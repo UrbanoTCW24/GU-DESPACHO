@@ -1,0 +1,76 @@
+﻿
+> gu-despacho@0.1.0 lint
+> eslint
+
+
+C:\Users\Usuario01\GU-DESPACHO\src\app\dashboard\actions.ts
+  12:39  warning  'boxesError' is assigned a value but never used   @typescript-eslint/no-unused-vars
+  19:38  warning  'openError' is assigned a value but never used    @typescript-eslint/no-unused-vars
+  25:39  warning  'itemsError' is assigned a value but never used   @typescript-eslint/no-unused-vars
+  32:39  warning  'recentError' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Usuario01\GU-DESPACHO\src\app\dashboard\config\actions.ts
+  36:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Usuario01\GU-DESPACHO\src\app\dashboard\config\brand-manager.tsx
+  11:52  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Usuario01\GU-DESPACHO\src\app\dashboard\config\model-manager.tsx
+   35:60  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   35:75  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   51:69  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  177:62  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Usuario01\GU-DESPACHO\src\app\dashboard\dispatch\[boxId]\actions.ts
+  26:63  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  48:26  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Usuario01\GU-DESPACHO\src\app\dashboard\dispatch\[boxId]\page.tsx
+  2:10  warning  'redirect' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Usuario01\GU-DESPACHO\src\app\dashboard\dispatch\[boxId]\print\page.tsx
+    2:10  warning  'redirect' is defined but never used      @typescript-eslint/no-unused-vars
+   87:45  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   95:47  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  101:49  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Usuario01\GU-DESPACHO\src\app\dashboard\dispatch\[boxId]\scanner.tsx
+   10:18  warning  'AlertTriangle' is defined but never used  @typescript-eslint/no-unused-vars
+   16:18  error    Unexpected any. Specify a different type   @typescript-eslint/no-explicit-any
+   17:12  error    Unexpected any. Specify a different type   @typescript-eslint/no-explicit-any
+  119:49  error    Unexpected any. Specify a different type   @typescript-eslint/no-explicit-any
+  190:53  error    Unexpected any. Specify a different type   @typescript-eslint/no-explicit-any
+  205:57  error    Unexpected any. Specify a different type   @typescript-eslint/no-explicit-any
+
+C:\Users\Usuario01\GU-DESPACHO\src\app\dashboard\dispatch\actions.ts
+  4:10  warning  'revalidatePath' is defined but never used  @typescript-eslint/no-unused-vars
+  5:10  warning  'redirect' is defined but never used        @typescript-eslint/no-unused-vars
+
+C:\Users\Usuario01\GU-DESPACHO\src\app\dashboard\dispatch\new-box-form.tsx
+  19:50  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Usuario01\GU-DESPACHO\src\app\dashboard\page.tsx
+  78:61  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Usuario01\GU-DESPACHO\src\app\dashboard\search\actions.ts
+  13:13  warning  'data' is assigned a value but never used   @typescript-eslint/no-unused-vars
+  13:19  warning  'error' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Usuario01\GU-DESPACHO\src\app\dashboard\search\page.tsx
+  14:44  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Usuario01\GU-DESPACHO\src\app\dashboard\users\page.tsx
+  41:48  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Usuario01\GU-DESPACHO\src\app\dashboard\users\user-table.tsx
+  41:18  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Usuario01\GU-DESPACHO\src\utils\supabase\middleware.ts
+  18:58  warning  'options' is defined but never used        @typescript-eslint/no-unused-vars
+  51:17  warning  'user' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Usuario01\GU-DESPACHO\src\utils\supabase\server.ts
+  1:35  warning  'CookieOptions' is defined but never used  @typescript-eslint/no-unused-vars
+
+Ô£û 35 problems (20 errors, 15 warnings)
+
