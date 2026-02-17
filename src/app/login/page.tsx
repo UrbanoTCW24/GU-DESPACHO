@@ -68,7 +68,7 @@ export default async function LoginPage({
                                 required
                             />
                         </div>
-                        <div className="flex gap-4 pt-4">
+                        <div className="flex flex-col gap-4 pt-4">
                             <Button formAction={login} className="w-full">
                                 Iniciar Sesión
                             </Button>

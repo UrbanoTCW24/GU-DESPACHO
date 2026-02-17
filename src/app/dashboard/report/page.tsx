@@ -52,6 +52,7 @@ export default async function ReportPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
+                                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                                 {reportData.map((item: any) => {
                                     // Extract series values
                                     const seriesValues = Object.values(item.series_data || {})

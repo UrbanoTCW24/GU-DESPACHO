@@ -9,27 +9,27 @@ export async function getDashboardStats() {
     const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString()
 
     // 1. Boxes Created Today
-    const { count: boxesToday, error: boxesError } = await supabase
+    const { count: boxesToday } = await supabase
         .from('boxes')
         .select('*', { count: 'exact', head: true })
         .gte('created_at', startOfDay)
         .lt('created_at', endOfDay)
 
     // 2. Open Boxes (Pending)
-    const { count: openBoxes, error: openError } = await supabase
+    const { count: openBoxes } = await supabase
         .from('boxes')
         .select('*', { count: 'exact', head: true })
         .eq('status', 'open')
 
     // 3. Items Scanned Today
-    const { count: itemsToday, error: itemsError } = await supabase
+    const { count: itemsToday } = await supabase
         .from('equipment')
         .select('*', { count: 'exact', head: true })
         .gte('scanned_at', startOfDay)
         .lt('scanned_at', endOfDay)
 
     // 4. Recent Activity (Last 5 modified boxes)
-    const { data: recentBoxes, error: recentError } = await supabase
+    const { data: recentBoxes } = await supabase
         .from('boxes')
         .select(`
             id,

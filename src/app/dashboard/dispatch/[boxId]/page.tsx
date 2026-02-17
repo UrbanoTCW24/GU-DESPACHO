@@ -1,5 +1,5 @@
 import { getBoxDetails } from './actions'
-import { redirect } from 'next/navigation'
+
 import Scanner from './scanner'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Box } from 'lucide-react'

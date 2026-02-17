@@ -1,0 +1,100 @@
+﻿
+> gu-despacho@0.1.0 lint
+> eslint
+
+
+C:\Users\Usuario01\GU-DESPACHO\src\app\dashboard\actions.ts
+  12:39  warning  'boxesError' is assigned a value but never used   @typescript-eslint/no-unused-vars
+  19:38  warning  'openError' is assigned a value but never used    @typescript-eslint/no-unused-vars
+  25:39  warning  'itemsError' is assigned a value but never used   @typescript-eslint/no-unused-vars
+  32:39  warning  'recentError' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Usuario01\GU-DESPACHO\src\app\dashboard\config\actions.ts
+  36:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  59:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Usuario01\GU-DESPACHO\src\app\dashboard\config\brand-manager.tsx
+  11:52  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Usuario01\GU-DESPACHO\src\app\dashboard\dispatch\[boxId]\actions.ts
+  39:51  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  51:26  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  53:40  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  61:45  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  87:49  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  88:62  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Usuario01\GU-DESPACHO\src\app\dashboard\dispatch\[boxId]\page.tsx
+  2:10  warning  'redirect' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Usuario01\GU-DESPACHO\src\app\dashboard\dispatch\[boxId]\print-summary\page.tsx
+  2:10  warning  'Badge' is defined but never used    @typescript-eslint/no-unused-vars
+  5:21  warning  'Printer' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Usuario01\GU-DESPACHO\src\app\dashboard\dispatch\[boxId]\print\page.tsx
+    2:10  warning  'redirect' is defined but never used                                    @typescript-eslint/no-unused-vars
+    7:21  warning  'Printer' is defined but never used                                     @typescript-eslint/no-unused-vars
+   24:82  error    Comments inside children section of tag should be placed inside braces  react/jsx-no-comment-textnodes
+   96:45  error    Unexpected any. Specify a different type                                @typescript-eslint/no-explicit-any
+  104:47  error    Unexpected any. Specify a different type                                @typescript-eslint/no-explicit-any
+  108:49  error    Unexpected any. Specify a different type                                @typescript-eslint/no-explicit-any
+
+C:\Users\Usuario01\GU-DESPACHO\src\app\dashboard\dispatch\[boxId]\scanner.tsx
+   11:18   warning  'AlertTriangle' is defined but never used  @typescript-eslint/no-unused-vars
+   11:81   warning  'Play' is defined but never used           @typescript-eslint/no-unused-vars
+   11:95   warning  'Save' is defined but never used           @typescript-eslint/no-unused-vars
+   11:101  warning  'X' is defined but never used              @typescript-eslint/no-unused-vars
+   28:18   error    Unexpected any. Specify a different type   @typescript-eslint/no-explicit-any
+   29:12   error    Unexpected any. Specify a different type   @typescript-eslint/no-explicit-any
+  142:25   error    Unexpected any. Specify a different type   @typescript-eslint/no-explicit-any
+  215:53   error    Unexpected any. Specify a different type   @typescript-eslint/no-explicit-any
+  353:53   error    Unexpected any. Specify a different type   @typescript-eslint/no-explicit-any
+  369:57   error    Unexpected any. Specify a different type   @typescript-eslint/no-explicit-any
+
+C:\Users\Usuario01\GU-DESPACHO\src\app\dashboard\dispatch\actions.ts
+  5:10  warning  'redirect' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Usuario01\GU-DESPACHO\src\app\dashboard\dispatch\edit-box-dialog.tsx
+  29:10  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  30:13  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Usuario01\GU-DESPACHO\src\app\dashboard\dispatch\new-box-form.tsx
+  19:50  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Usuario01\GU-DESPACHO\src\app\dashboard\page.tsx
+  14:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  85:61  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Usuario01\GU-DESPACHO\src\app\dashboard\report-box\page.tsx
+  55:55  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Usuario01\GU-DESPACHO\src\app\dashboard\report\download-button.tsx
+  26:47  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Usuario01\GU-DESPACHO\src\app\dashboard\report\page.tsx
+  55:56  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Usuario01\GU-DESPACHO\src\app\dashboard\search\actions.ts
+  19:9  error    'searchBuilder' is never reassigned. Use 'const' instead  prefer-const
+  19:9  warning  'searchBuilder' is assigned a value but never used        @typescript-eslint/no-unused-vars
+
+C:\Users\Usuario01\GU-DESPACHO\src\app\dashboard\search\page.tsx
+  63:49  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Usuario01\GU-DESPACHO\src\app\dashboard\users\page.tsx
+   4:16  warning  'CardContent' is defined but never used   @typescript-eslint/no-unused-vars
+  40:44  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\Usuario01\GU-DESPACHO\src\app\dashboard\users\user-table.tsx
+  41:18  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Usuario01\GU-DESPACHO\src\utils\supabase\middleware.ts
+  18:58  warning  'options' is defined but never used        @typescript-eslint/no-unused-vars
+  51:17  warning  'user' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\Usuario01\GU-DESPACHO\src\utils\supabase\server.ts
+  1:35  warning  'CookieOptions' is defined but never used  @typescript-eslint/no-unused-vars
+
+Ô£û 50 problems (30 errors, 20 warnings)
+  1 error and 0 warnings potentially fixable with the `--fix` option.
+

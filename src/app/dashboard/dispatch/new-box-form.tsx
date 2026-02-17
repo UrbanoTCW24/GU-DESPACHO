@@ -16,6 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function NewBoxForm({ models }: { models: any[] }) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)

@@ -2,6 +2,8 @@
 
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { SupabaseClient } from '@supabase/supabase-js'
+
 
 export async function getBoxDetails(boxId: string) {
     const supabase = await createClient()
@@ -36,7 +38,7 @@ function validateLocalDuplicates(seriesData: SeriesData): string | null {
     return null
 }
 
-async function validateGlobalDuplicates(supabase: any, seriesData: SeriesData): Promise<string | null> {
+async function validateGlobalDuplicates(supabase: SupabaseClient, seriesData: SeriesData): Promise<string | null> {
     for (const [key, value] of Object.entries(seriesData)) {
         if (!value || String(value).length < 3) continue
 
@@ -48,8 +50,10 @@ async function validateGlobalDuplicates(supabase: any, seriesData: SeriesData): 
             .maybeSingle()
 
         if (existing) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const boxes: any = existing.boxes
             const boxNum = Array.isArray(boxes) ? boxes[0]?.box_number : boxes?.box_number
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const owner = (existing as any).users?.email || 'otro usuario'
 
             return `La serie ${value} ya existe en la caja ${boxNum} (Usr: ${owner})`
@@ -58,7 +62,7 @@ async function validateGlobalDuplicates(supabase: any, seriesData: SeriesData): 
     return null
 }
 
-async function checkSapValidation(supabase: any, seriesData: SeriesData): Promise<{ isValid: boolean, material: string | null }> {
+async function checkSapValidation(supabase: SupabaseClient, seriesData: SeriesData): Promise<{ isValid: boolean, material: string | null }> {
     const keys = Object.keys(seriesData)
     // Find main series key (usually contains '1', 'sn', or is first)
     const mainSeriesKey = keys.find(k =>
@@ -84,7 +88,7 @@ async function checkSapValidation(supabase: any, seriesData: SeriesData): Promis
     }
 }
 
-async function registerSeriesGlobally(supabase: any, seriesData: SeriesData, equipmentId: string, boxId: string) {
+async function registerSeriesGlobally(supabase: SupabaseClient, seriesData: SeriesData, equipmentId: string, boxId: string) {
     const validValues = Object.values(seriesData).filter((v: any) => v && String(v).length > 2)
 
     for (const val of validValues) {

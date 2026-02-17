@@ -11,6 +11,7 @@ interface DashboardStats {
     boxesToday: number;
     openBoxes: number;
     itemsToday: number;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     recentActivity: any[];
 }
 
@@ -82,6 +83,7 @@ export default async function DashboardPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-8">
+                            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                             {stats.recentActivity.map((box: any) => (
                                 <div key={box.id} className="flex items-center">
                                     <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">

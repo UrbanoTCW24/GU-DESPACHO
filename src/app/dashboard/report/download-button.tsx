@@ -23,6 +23,7 @@ export function DownloadReportButton() {
             }
 
             // Map data to flat structure for Excel
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const excelRows = data.map((item: any) => {
                 const seriesValues = Object.values(item.series_data || {})
                 const primarySeries = seriesValues[0] as string || ''

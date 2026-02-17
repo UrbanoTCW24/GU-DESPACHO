@@ -38,7 +38,7 @@ export function UserTable({ users }: { users: User[] }) {
             toast.success("Rol actualizado", {
                 description: "El rol del usuario ha sido cambiado exitosamente.",
             })
-        } catch (error) {
+        } catch {
             toast.error("Error", {
                 description: "No se pudo actualizar el rol.",
             })

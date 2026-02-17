@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Trash2, AlertTriangle, CheckCircle, PackageCheck, Printer, ArrowRight, Play, Pencil, Save, X } from 'lucide-react'
+import { Trash2, CheckCircle, PackageCheck, Printer, ArrowRight, Pencil } from 'lucide-react'
 import { toast } from 'sonner'
 import { Progress } from '@/components/ui/progress'
 import { useRouter } from 'next/navigation'
@@ -25,7 +25,9 @@ import { Label } from '@/components/ui/label'
 
 interface ScannerProps {
     boxId: string
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     modelConfig: any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     items: any[]
     totalTarget: number
     status: string
@@ -139,6 +141,7 @@ export default function Scanner({ boxId, modelConfig, items, totalTarget, status
             toast.success("Caja cerrada y nueva caja creada")
             // 3. Redirect to new box
             router.push(`/dashboard/dispatch/${cloneResult.boxId}`)
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
             toast.error(error.message || "Error al continuar despacho")
             setLoading(false)
@@ -212,6 +215,7 @@ export default function Scanner({ boxId, modelConfig, items, totalTarget, status
                             </div>
                         ) : (
                             <div className="space-y-4">
+                                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                                 {fields.map((field: any, index: number) => (
                                     <div key={index} className="space-y-2">
                                         <label className="text-sm font-medium flex justify-between">
@@ -350,6 +354,7 @@ export default function Scanner({ boxId, modelConfig, items, totalTarget, status
                                 <TableRow>
                                     <TableHead>#</TableHead>
                                     <TableHead>SAP</TableHead>
+                                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                                     {fields.map((f: any) => <TableHead key={f.name}>{f.name}</TableHead>)}
                                     <TableHead></TableHead>
                                 </TableRow>
@@ -366,6 +371,7 @@ export default function Scanner({ boxId, modelConfig, items, totalTarget, status
                                                 <Badge variant="outline" className="text-yellow-600 border-yellow-600">Pending</Badge>
                                             )}
                                         </TableCell>
+                                        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                                         {fields.map((f: any) => (
                                             <TableCell key={f.name} className="font-medium">
                                                 {item.series_data[f.name]}

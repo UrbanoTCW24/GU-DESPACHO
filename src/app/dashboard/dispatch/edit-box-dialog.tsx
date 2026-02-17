@@ -26,7 +26,9 @@ import { updateBox } from './actions'
 import { useRouter } from 'next/navigation'
 
 interface EditBoxDialogProps {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     box: any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     models: any[]
 }
 

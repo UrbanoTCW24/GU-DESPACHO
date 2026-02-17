@@ -60,6 +60,7 @@ export default function SearchPage() {
                         <div className="text-muted-foreground">No se encontraron equipos con esa serie.</div>
                     ) : (
                         <div className="grid gap-4">
+                            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                             {results.map((item: any) => (
                                 <Card key={item.id}>
                                     <CardContent className="pt-6">

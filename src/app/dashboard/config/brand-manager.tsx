@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 
-export function BrandManager({ brands }: { brands: any[] }) {
+export function BrandManager({ brands }: { brands: { id: string; name: string }[] }) {
     const [loading, setLoading] = useState(false)
 
     const handleSubmit = async (formData: FormData) => {

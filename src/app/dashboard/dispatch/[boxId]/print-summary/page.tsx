@@ -1,8 +1,7 @@
 import { getBoxDetails } from '../actions'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { ArrowLeft, Printer } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { PrintButton } from '@/components/print-button'
 
 export default async function PrintSummaryPage(props: { params: Promise<{ boxId: string }> }) {

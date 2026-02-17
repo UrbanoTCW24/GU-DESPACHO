@@ -14,19 +14,7 @@ export async function searchEquipmentBySeries(query: string) {
 
     const boxIds = boxes?.map(b => b.id) || []
 
-    // 2. Build the equipment query
-    // We want matching series OR matching box_id
-    let searchBuilder = supabase
-        .from('equipment')
-        .select(`
-            id,
-            box_id,
-            scanned_at,
-            is_sap_validated,
-            series_data,
-            boxes (box_number, status),
-            users (email)
-        `)
+
 
     if (boxIds.length > 0) {
         // If we found boxes, use an OR condition: series match OR box_id match

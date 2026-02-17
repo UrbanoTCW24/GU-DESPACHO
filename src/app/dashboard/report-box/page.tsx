@@ -52,6 +52,7 @@ export default async function BoxReportPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
+                                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                                 {reportData.map((box: any) => {
                                     const progress = Math.round((box.item_count / box.total_items) * 100)
                                     const isComplete = box.item_count >= box.total_items

@@ -1,7 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import { UserTable } from './user-table'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 export default async function UsersPage() {
     const supabase = await createClient()
@@ -37,6 +37,7 @@ export default async function UsersPage() {
                     <CardTitle>Gestión de Usuarios</CardTitle>
                     <CardDescription>Administra los permisos y roles de los usuarios del sistema.</CardDescription>
                 </CardHeader>
+                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                 <UserTable users={users as any} />
             </Card>
         </div>

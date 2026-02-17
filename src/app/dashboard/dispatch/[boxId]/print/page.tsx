@@ -1,10 +1,10 @@
 import { getBoxDetails } from '../actions'
-import { redirect } from 'next/navigation'
+
 import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { ArrowLeft, Printer } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { PrintButton } from '@/components/print-button'
 
 export default async function PrintPage(props: { params: Promise<{ boxId: string }> }) {
@@ -22,9 +22,6 @@ export default async function PrintPage(props: { params: Promise<{ boxId: string
         <div className="p-8 max-w-4xl mx-auto bg-white min-h-screen text-black print:p-0 print:max-w-none">
             {/* Navigation - Hidden on Print */}
             <div className="mb-8 flex justify-between items-center print:hidden">
-                // ...
-
-                // In return
                 <Button variant="outline" asChild>
                     <Link href={`/dashboard/dispatch/${box.id}`}>
                         <ArrowLeft className="mr-2 h-4 w-4" />
