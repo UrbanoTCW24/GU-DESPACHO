@@ -17,12 +17,12 @@ export async function getGeneralReport(limit = 100) {
 
     const { data, error } = await supabase
         .from('equipment')
-        .select('*, boxes(box_number, models(name, brands(name))), users(email, name)')
+        .select('*, boxes(box_number, models(name, brands(name))), users:users!equipment_scanned_by_fkey(email, name)')
         .order('scanned_at', { ascending: false })
         .limit(limit)
 
     if (error) {
-        console.error('Error fetching report:', error)
+        console.error('Error fetching report:', JSON.stringify(error, null, 2))
         return []
     }
 
