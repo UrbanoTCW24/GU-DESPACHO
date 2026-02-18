@@ -13,6 +13,7 @@ interface DashboardStats {
     itemsToday: number;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     recentActivity: any[];
+    userMetrics: { name: string; email: string; count: number }[];
 }
 
 export default async function DashboardPage() {
@@ -23,33 +24,33 @@ export default async function DashboardPage() {
             <h1 className="text-3xl font-bold">Dashboard</h1>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Card>
+                <Card className="border-l-4 border-l-blue-500 shadow-sm">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Cajas Hoy</CardTitle>
-                        <Box className="h-4 w-4 text-muted-foreground" />
+                        <CardTitle className="text-sm font-medium text-muted-foreground">Cajas Hoy</CardTitle>
+                        <Box className="h-4 w-4 text-blue-500" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{stats.boxesToday}</div>
+                        <div className="text-2xl font-bold text-slate-800">{stats.boxesToday}</div>
                         <p className="text-xs text-muted-foreground">Creadas hoy</p>
                     </CardContent>
                 </Card>
-                <Card>
+                <Card className="border-l-4 border-l-green-500 shadow-sm">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Equipos Hoy</CardTitle>
-                        <ScanLine className="h-4 w-4 text-muted-foreground" />
+                        <CardTitle className="text-sm font-medium text-muted-foreground">Equipos Hoy</CardTitle>
+                        <ScanLine className="h-4 w-4 text-green-500" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{stats.itemsToday}</div>
+                        <div className="text-2xl font-bold text-slate-800">{stats.itemsToday}</div>
                         <p className="text-xs text-muted-foreground">Escaneados hoy</p>
                     </CardContent>
                 </Card>
-                <Card>
+                <Card className="border-l-4 border-l-orange-500 shadow-sm">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Pendientes</CardTitle>
-                        <Clock className="h-4 w-4 text-muted-foreground" />
+                        <CardTitle className="text-sm font-medium text-muted-foreground">Pendientes</CardTitle>
+                        <Clock className="h-4 w-4 text-orange-500" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{stats.openBoxes}</div>
+                        <div className="text-2xl font-bold text-slate-800">{stats.openBoxes}</div>
                         <p className="text-xs text-muted-foreground">Cajas abiertas</p>
                     </CardContent>
                 </Card>
@@ -92,7 +93,7 @@ export default async function DashboardPage() {
                                     <div className="ml-4 space-y-1">
                                         <p className="text-sm font-medium leading-none">{box.box_number}</p>
                                         <p className="text-sm text-muted-foreground">
-                                            {box.models?.brands?.name} - {box.models?.name} ({box.users?.email})
+                                            {box.models?.brands?.name} - {box.models?.name} ({box.users?.name || box.users?.email})
                                         </p>
                                     </div>
                                     <div className="ml-auto font-medium">
@@ -117,17 +118,39 @@ export default async function DashboardPage() {
                         </div>
                     </CardContent>
                 </Card>
-                {/* <Card className="col-span-3">
+                <Card className="col-span-3">
                     <CardHeader>
-                        <CardTitle>Recent Sales</CardTitle>
-                        <CardDescription>
-                        You made 265 sales this month.
-                        </CardDescription>
+                        <CardTitle>Top Usuarios (Cajas)</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <RecentSales />
+                        <div className="space-y-4">
+                            {stats.userMetrics.slice(0, 5).map((user) => (
+                                <div key={user.email} className="space-y-1">
+                                    <div className="flex items-center justify-between text-sm">
+                                        <div className="flex items-center gap-2">
+                                            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">
+                                                {user.name.charAt(0).toUpperCase()}
+                                            </div>
+                                            <span className="font-medium">{user.name}</span>
+                                        </div>
+                                        <span className="font-bold">{user.count}</span>
+                                    </div>
+                                    <div className="relative h-2 w-full overflow-hidden rounded-full bg-secondary">
+                                        <div
+                                            className="h-full bg-primary transition-all duration-500"
+                                            style={{
+                                                width: `${stats.userMetrics.length > 0 ? (user.count / stats.userMetrics[0].count) * 100 : 0}%`,
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                            ))}
+                            {stats.userMetrics.length === 0 && (
+                                <p className="text-muted-foreground text-sm text-center">No hay actividad registrada.</p>
+                            )}
+                        </div>
                     </CardContent>
-                </Card> */}
+                </Card>
             </div>
         </div>
     )

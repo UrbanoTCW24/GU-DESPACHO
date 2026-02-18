@@ -9,12 +9,13 @@ import {
     TableRow,
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
-import { getGeneralReport } from './actions'
+import { getGeneralReport, getTotalEquipment } from './actions'
 import { DownloadReportButton } from './download-button'
 import { DeleteBoxButton } from '@/components/delete-box-button'
 
 export default async function ReportPage() {
     const reportData = await getGeneralReport(200)
+    const totalEquipment = await getTotalEquipment()
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     let isSuperAdmin = false
@@ -30,9 +31,38 @@ export default async function ReportPage() {
                 <DownloadReportButton />
             </div>
 
+            {/* KPI Card */}
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <Card className="border-l-4 border-l-green-500 shadow-sm">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium text-muted-foreground">
+                            Equipos Registrados
+                        </CardTitle>
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            className="h-4 w-4 text-green-500"
+                        >
+                            <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                        </svg>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold text-slate-800">{totalEquipment}</div>
+                        <p className="text-xs text-muted-foreground">
+                            Total histórico de equipos validados
+                        </p>
+                    </CardContent>
+                </Card>
+            </div>
+
             <Card>
                 <CardHeader>
-                    <CardTitle>Detalle de Equipos Registrados (Últimos 200)</CardTitle>
+                    <CardTitle>Detalle de Equipos Registrados</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <div className="rounded-md border">
@@ -41,11 +71,11 @@ export default async function ReportPage() {
                                 <TableRow>
                                     <TableHead>Fecha</TableHead>
                                     <TableHead>Caja</TableHead>
-                                    <TableHead>Marca / Modelo</TableHead>
+                                    <TableHead>Marca</TableHead>
+                                    <TableHead>Modelo</TableHead>
                                     <TableHead>Material</TableHead>
                                     <TableHead>Serie SAP / Principal</TableHead>
-                                    <TableHead>Serie 2</TableHead>
-                                    <TableHead>Datos Adicionales</TableHead>
+                                    <TableHead>Series Adicionales</TableHead>
                                     <TableHead>Usuario</TableHead>
                                     <TableHead>Estado</TableHead>
                                     {isSuperAdmin && <TableHead>Acciones</TableHead>}
@@ -57,12 +87,11 @@ export default async function ReportPage() {
                                     // Extract series values
                                     const seriesValues = Object.values(item.series_data || {})
                                     const primarySeries = seriesValues[0] as string || '-'
-                                    const secondarySeries = seriesValues[1] as string || '-'
-                                    const otherSeries = seriesValues.slice(2).join(', ')
+                                    // Get all other series as an array
+                                    const additionalSeries = seriesValues.slice(1) as string[]
 
-                                    // Material column placeholder (using Model Name for now as requested by user often they are same or linked)
-                                    // If user needs specific material code, we'd need to add it to schema.
-                                    const material = item.boxes?.models?.name || '-'
+                                    // Material from SAP validation
+                                    const material = item.material || '-'
 
                                     return (
                                         <TableRow key={item.id}>
@@ -75,17 +104,26 @@ export default async function ReportPage() {
                                                 })}
                                             </TableCell>
                                             <TableCell className="font-bold">{item.boxes?.box_number}</TableCell>
+                                            <TableCell>{item.boxes?.models?.brands?.name}</TableCell>
+                                            <TableCell>{item.boxes?.models?.name}</TableCell>
+                                            <TableCell className="font-mono font-bold text-blue-600">{material}</TableCell>
+                                            <TableCell className="font-mono font-medium">{primarySeries}</TableCell>
                                             <TableCell>
-                                                <div className="flex flex-col">
-                                                    <span className="font-semibold">{item.boxes?.models?.brands?.name}</span>
-                                                    <span className="text-xs text-muted-foreground">{item.boxes?.models?.name}</span>
+                                                <div className="flex flex-wrap gap-1 max-w-[300px]">
+                                                    {additionalSeries.length > 0 ? (
+                                                        additionalSeries.map((serie, idx) => (
+                                                            <Badge key={idx} variant="outline" className="font-mono text-xs bg-slate-50">
+                                                                {serie}
+                                                            </Badge>
+                                                        ))
+                                                    ) : (
+                                                        <span className="text-muted-foreground text-xs">-</span>
+                                                    )}
                                                 </div>
                                             </TableCell>
-                                            <TableCell>{material}</TableCell>
-                                            <TableCell className="font-mono">{primarySeries}</TableCell>
-                                            <TableCell className="font-mono text-sm">{secondarySeries}</TableCell>
-                                            <TableCell className="text-xs text-muted-foreground">{otherSeries}</TableCell>
-                                            <TableCell className="text-sm">{item.users?.email}</TableCell>
+                                            <TableCell className="text-sm">
+                                                {item.users?.name || item.users?.email}
+                                            </TableCell>
                                             <TableCell>
                                                 {item.is_sap_validated ? (
                                                     <Badge className="bg-green-600">Validado</Badge>

@@ -22,26 +22,38 @@ export function DownloadReportButton() {
                 return
             }
 
+            // Calculate max number of series to generate dynamic columns
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const maxSeriesCount = data.reduce((max: number, item: any) => {
+                const count = Object.keys(item.series_data || {}).length
+                return count > max ? count : max
+            }, 0)
+
             // Map data to flat structure for Excel
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const excelRows = data.map((item: any) => {
-                const seriesValues = Object.values(item.series_data || {})
-                const primarySeries = seriesValues[0] as string || ''
-                const secondarySeries = seriesValues[1] as string || ''
-                const otherSeries = seriesValues.slice(2).join(' | ')
+                const seriesValues = Object.values(item.series_data || {}) as string[]
 
-                return {
+                // Base row data
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const row: any = {
                     'Fecha de Registro': new Date(item.scanned_at).toLocaleString('es-MX'),
                     'Caja': item.boxes?.box_number || '',
                     'Marca': item.boxes?.models?.brands?.name || '',
                     'Modelo': item.boxes?.models?.name || '',
-                    'Material': item.boxes?.models?.name || '', // Using model name as material per previous logic
-                    'Serie Principal (SAP)': primarySeries,
-                    'Serie Secundaria': secondarySeries,
-                    'Otras Series': otherSeries,
-                    'Usuario': item.users?.email || '',
-                    'Estado Validación': item.is_sap_validated ? 'VALIDADO OK' : 'MANUAL'
+                    'Material': item.material || '', // Correctly mapping actual material field
                 }
+
+                // Dynamic Series Columns
+                for (let i = 0; i < maxSeriesCount; i++) {
+                    row[`Serie ${i + 1}`] = seriesValues[i] || ''
+                }
+
+                // Append remaining static columns
+                row['Usuario'] = item.users?.name || item.users?.email || ''
+                row['Estado Validación'] = item.is_sap_validated ? 'VALIDADO OK' : 'MANUAL'
+
+                return row
             })
 
             // Create Worksheet
@@ -50,16 +62,20 @@ export function DownloadReportButton() {
             // Adjust column widths (auto width based on headers approx)
             const wscols = [
                 { wch: 20 }, // Fecha
-                { wch: 20 }, // Caja
+                { wch: 15 }, // Caja
                 { wch: 15 }, // Marca
-                { wch: 25 }, // Modelo
-                { wch: 25 }, // Material
-                { wch: 25 }, // Serie 1
-                { wch: 20 }, // Serie 2
-                { wch: 20 }, // Otras
-                { wch: 30 }, // Usuario
-                { wch: 15 }  // Estado
+                { wch: 20 }, // Modelo
+                { wch: 20 }, // Material
             ]
+
+            // Add width for dynamic series columns
+            for (let i = 0; i < maxSeriesCount; i++) {
+                wscols.push({ wch: 25 })
+            }
+
+            // Add widths for final duplicate static columns if any (Usuario, Estado)
+            wscols.push({ wch: 30 }) // Usuario
+            wscols.push({ wch: 15 }) // Estado
             worksheet['!cols'] = wscols
 
             // Create Workbook

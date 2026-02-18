@@ -1,15 +1,28 @@
 'use client'
 
-import { useState } from 'react'
-import { uploadSAPData, clearSAPData } from './sap-actions'
+import { useState, useEffect } from 'react'
+import { uploadSAPData, clearSAPData, getSAPRecordCount } from './sap-actions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { toast } from 'sonner'
-import { Upload, Trash2 } from 'lucide-react'
+import { Upload, Trash2, Database } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
 
 export function SAPUploader() {
     const [loading, setLoading] = useState(false)
+    const [recordCount, setRecordCount] = useState<number | null>(null)
+
+    const fetchCount = async () => {
+        const result = await getSAPRecordCount()
+        if (result && typeof result.count === 'number') {
+            setRecordCount(result.count)
+        }
+    }
+
+    useEffect(() => {
+        fetchCount()
+    }, [])
 
     const handleUpload = async (formData: FormData) => {
         setLoading(true)
@@ -23,6 +36,7 @@ export function SAPUploader() {
             // clear input
             const form = document.querySelector('#sap-upload-form') as HTMLFormElement
             if (form) form.reset()
+            fetchCount()
         }
     }
 
@@ -35,6 +49,7 @@ export function SAPUploader() {
             toast.error("Error", { description: result.error })
         } else {
             toast.success("Data eliminada", { description: "La base de datos SAP ha sido limpiada." })
+            fetchCount()
         }
     }
 
@@ -65,9 +80,17 @@ export function SAPUploader() {
             <CardHeader>
                 <div className="flex justify-between items-start">
                     <div>
-                        <CardTitle>Carga de Data SAP</CardTitle>
+                        <CardTitle className="flex items-center gap-2">
+                            Carga de Data SAP
+                            {recordCount !== null && (
+                                <Badge variant="secondary" className="text-xs font-normal">
+                                    <Database className="h-3 w-3 mr-1" />
+                                    {recordCount.toLocaleString()} registros
+                                </Badge>
+                            )}
+                        </CardTitle>
                         <CardDescription>
-                            Sube un archivo CSV con las series válidas. <br />
+                            Sube un archivo Excel (.xlsx, .xls) o CSV con las series válidas. <br />
                             Estructura: <strong>Serie</strong> (Requerido), <strong>Material</strong> (Requerido), <strong>Estado</strong> (Opcional).
                         </CardDescription>
                     </div>
@@ -79,7 +102,7 @@ export function SAPUploader() {
             </CardHeader>
             <CardContent className="space-y-4">
                 <form id="sap-upload-form" action={handleUpload} className="flex gap-2 items-center">
-                    <Input name="file" type="file" accept=".csv,.txt" required disabled={loading} />
+                    <Input name="file" type="file" accept=".csv,.txt,.xlsx,.xls" required disabled={loading} />
                     <Button type="submit" disabled={loading}>
                         <Upload className="h-4 w-4 mr-2" />
                         {loading ? 'Cargando...' : 'Subir'}

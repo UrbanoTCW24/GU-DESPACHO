@@ -23,6 +23,7 @@ import { toast } from 'sonner'
 
 interface User {
     id: string
+    name: string | null
     email: string
     role: UserRole
     created_at: string
@@ -60,6 +61,7 @@ export function UserTable({ users }: { users: User[] }) {
             <Table>
                 <TableHeader>
                     <TableRow>
+                        <TableHead>Nombre</TableHead>
                         <TableHead>Email</TableHead>
                         <TableHead>Rol Actual</TableHead>
                         <TableHead>Cambiar Rol</TableHead>
@@ -69,7 +71,8 @@ export function UserTable({ users }: { users: User[] }) {
                 <TableBody>
                     {users.map((user) => (
                         <TableRow key={user.id}>
-                            <TableCell className="font-medium">{user.email}</TableCell>
+                            <TableCell className="font-medium">{user.name || '-'}</TableCell>
+                            <TableCell>{user.email}</TableCell>
                             <TableCell>
                                 <Badge className={getRoleBadgeColor(user.role)}>{user.role}</Badge>
                             </TableCell>

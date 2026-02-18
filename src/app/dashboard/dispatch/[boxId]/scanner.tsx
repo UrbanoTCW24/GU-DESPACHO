@@ -31,10 +31,21 @@ interface ScannerProps {
     items: any[]
     totalTarget: number
     status: string
+    validSeries?: string[]
 }
 
-export default function Scanner({ boxId, modelConfig, items, totalTarget, status }: ScannerProps) {
+interface ItemUser {
+    name?: string
+    email?: string
+}
+
+export default function Scanner({ boxId, modelConfig, items, totalTarget, status, validSeries = [] }: ScannerProps) {
     const router = useRouter()
+    // ... existing state ...
+
+    // ... (rest of component logic remains same until render) ...
+
+
     const [inputs, setInputs] = useState<Record<string, string>>({})
     const [loading, setLoading] = useState(false)
     const [isEditingQty, setIsEditingQty] = useState(false)
@@ -182,6 +193,7 @@ export default function Scanner({ boxId, modelConfig, items, totalTarget, status
                         <CardTitle className="flex justify-between items-center">
                             Escáner de Series
                             {isClosed && <Badge variant="secondary">CERRADA</Badge>}
+                            {/* Debug: {validSeries.length} valid series loaded */}
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -228,8 +240,10 @@ export default function Scanner({ boxId, modelConfig, items, totalTarget, status
                                             ref={el => { if (el) inputRefs.current[index] = el }}
                                             value={inputs[field.name] || ''}
                                             onChange={e => {
-                                                const val = e.target.value
+                                                // Remove spaces to prevent "fake" length
+                                                const val = e.target.value.replace(/\s/g, '')
                                                 const maxLen = field.length ? parseInt(String(field.length), 10) : 0
+
                                                 if (maxLen > 0 && val.length > maxLen) return;
 
                                                 const newInputs = { ...inputs, [field.name]: val }
@@ -356,6 +370,7 @@ export default function Scanner({ boxId, modelConfig, items, totalTarget, status
                                     <TableHead>SAP</TableHead>
                                     {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                                     {fields.map((f: any) => <TableHead key={f.name}>{f.name}</TableHead>)}
+                                    <TableHead>Usuario</TableHead>
                                     <TableHead></TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -372,11 +387,27 @@ export default function Scanner({ boxId, modelConfig, items, totalTarget, status
                                             )}
                                         </TableCell>
                                         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                                        {fields.map((f: any) => (
-                                            <TableCell key={f.name} className="font-medium">
-                                                {item.series_data[f.name]}
-                                            </TableCell>
-                                        ))}
+                                        {fields.map((f: any) => {
+                                            const val = item.series_data[f.name]
+                                            const isValid = validSeries?.includes(String(val).trim())
+                                            return (
+                                                <TableCell key={f.name} className="font-medium">
+                                                    <div className="flex items-center gap-1">
+                                                        {isValid ? (
+                                                            <div className="h-2 w-2 rounded-full bg-green-500" title="Validado en SAP" />
+                                                        ) : (
+                                                            <div className="h-2 w-2 rounded-full bg-yellow-500" title="No encontrado en SAP" />
+                                                        )}
+                                                        <span className={isValid ? "text-green-700" : "text-yellow-700"}>
+                                                            {val}
+                                                        </span>
+                                                    </div>
+                                                </TableCell>
+                                            )
+                                        })}
+                                        <TableCell className="text-xs text-muted-foreground">
+                                            {item.users?.name || item.users?.email?.split('@')[0]}
+                                        </TableCell>
                                         <TableCell>
                                             <Button variant="ghost" size="sm" onClick={() => handleDelete(item.id)}>
                                                 <Trash2 className="h-4 w-4 text-red-500" />
@@ -386,7 +417,7 @@ export default function Scanner({ boxId, modelConfig, items, totalTarget, status
                                 ))}
                                 {items.length === 0 && (
                                     <TableRow>
-                                        <TableCell colSpan={fields.length + 2} className="text-center text-muted-foreground py-8">
+                                        <TableCell colSpan={fields.length + 3} className="text-center text-muted-foreground py-8">
                                             Escanea el primer equipo para comenzar
                                         </TableCell>
                                     </TableRow>

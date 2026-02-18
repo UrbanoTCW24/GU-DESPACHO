@@ -4,27 +4,21 @@ import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function createBox(modelId: string, itemsCount: number) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return { error: 'Unauthorized' }
 
-    // Fallback: Generate a random box number if DB sequence trigger is missing
-    // Format: BOX-{Random 6 digits}
-    const fallbackBoxNumber = `BOX-${Math.floor(Math.random() * 1000000).toString().padStart(6, '0')}`
-
-    // We try to insert. If 'box_number' is NULL, PG triggers (if active) should handle it.
-    // BUT since we got a Not-Null violation, we know the trigger is missing/broken.
-    // So we MUST provide a value.
-
-    // Note: If you run 'create_sequence.sql', you could pass NULL here.
-    // But to be safe and strictly unblock the user, we send a value.
+    // We pass 'BOX-PENDING' so the DB Trigger picks it up and replaces it with 'CAJA-XXXXXX'
+    // The trigger condition is: (NEW.box_number IS NULL OR NEW.box_number LIKE 'BOX-%')
+    const placeholderBoxNumber = 'BOX-PENDING'
 
     const { data, error } = await supabase
         .from('boxes')
         .insert({
-            box_number: fallbackBoxNumber,
+            box_number: placeholderBoxNumber,
             created_by: user.id,
             model_id: modelId,
             total_items: itemsCount,
@@ -36,6 +30,16 @@ export async function createBox(modelId: string, itemsCount: number) {
     if (error) return { error: error.message }
 
     return { success: true, boxId: data.id }
+}
+
+export async function getTotalBoxes() {
+    const supabase = await createClient()
+    const { count, error } = await supabase
+        .from('boxes')
+        .select('*', { count: 'exact', head: true })
+
+    if (error) return 0
+    return count || 0
 }
 
 export async function duplicateBox(originalBoxId: string) {
@@ -54,12 +58,12 @@ export async function duplicateBox(originalBoxId: string) {
     if (fetchError || !original) return { error: 'Original box not found' }
 
     // 2. Create new box with same config
-    const fallbackBoxNumber = `BOX-${Math.floor(Math.random() * 1000000).toString().padStart(6, '0')}`
+    const placeholderBoxNumber = 'BOX-PENDING'
 
     const { data: newBox, error: createError } = await supabase
         .from('boxes')
         .insert({
-            box_number: fallbackBoxNumber,
+            box_number: placeholderBoxNumber,
             created_by: user.id,
             model_id: original.model_id,
             total_items: original.total_items,

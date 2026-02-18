@@ -3,6 +3,8 @@ import { redirect } from 'next/navigation'
 import { UserTable } from './user-table'
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
+import { CreateUserDialog } from './create-user-dialog'
+
 export default async function UsersPage() {
     const supabase = await createClient()
 
@@ -33,9 +35,12 @@ export default async function UsersPage() {
     return (
         <div className="space-y-6">
             <Card>
-                <CardHeader>
-                    <CardTitle>Gestión de Usuarios</CardTitle>
-                    <CardDescription>Administra los permisos y roles de los usuarios del sistema.</CardDescription>
+                <CardHeader className="flex flex-row items-center justify-between">
+                    <div className="space-y-1.5">
+                        <CardTitle>Gestión de Usuarios</CardTitle>
+                        <CardDescription>Administra los permisos y roles de los usuarios del sistema.</CardDescription>
+                    </div>
+                    <CreateUserDialog />
                 </CardHeader>
                 {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                 <UserTable users={users as any} />

@@ -9,7 +9,7 @@ export async function getBoxDetails(boxId: string) {
     const supabase = await createClient()
     const { data: box, error } = await supabase
         .from('boxes')
-        .select('*, models(*, brands(*)), users(email)')
+        .select('*, models(*, brands(*)), users(email, name)')
         .eq('id', boxId)
         .single()
 
@@ -18,11 +18,41 @@ export async function getBoxDetails(boxId: string) {
     // Fetch items in the box
     const { data: items } = await supabase
         .from('equipment')
-        .select('*, users(email)')
+        .select('*, users(email, name)')
         .eq('box_id', boxId)
         .order('scanned_at', { ascending: false })
 
-    return { ...box, items: items || [] }
+    // Validar series contra SAP (Batch Read-Time)
+    const validSeriesSet = new Set<string>()
+    if (items && items.length > 0) {
+        // Collect all series values
+        const allSeries: string[] = []
+        items.forEach((item: any) => {
+            if (item.series_data) {
+                Object.values(item.series_data).forEach((val: any) => {
+                    if (val && String(val).length > 1) {
+                        allSeries.push(String(val).trim())
+                    }
+                })
+            }
+        })
+
+        // Chunking for safety (Supabase/Postgres limits on IN clause)
+        const uniqueSeries = Array.from(new Set(allSeries))
+        const CHUNK_SIZE = 500
+
+        for (let i = 0; i < uniqueSeries.length; i += CHUNK_SIZE) {
+            const chunk = uniqueSeries.slice(i, i + CHUNK_SIZE)
+            const { data: found } = await supabase
+                .from('sap_data')
+                .select('series')
+                .in('series', chunk)
+
+            found?.forEach(r => validSeriesSet.add(String(r.series).trim()))
+        }
+    }
+
+    return { ...box, items: items || [], validSeries: Array.from(validSeriesSet) }
 }
 
 // --- Helper Functions ---
@@ -64,27 +94,39 @@ async function validateGlobalDuplicates(supabase: SupabaseClient, seriesData: Se
 
 async function checkSapValidation(supabase: SupabaseClient, seriesData: SeriesData): Promise<{ isValid: boolean, material: string | null }> {
     const keys = Object.keys(seriesData)
-    // Find main series key (usually contains '1', 'sn', or is first)
-    const mainSeriesKey = keys.find(k =>
-        k.toLowerCase().includes('1') ||
-        k.toLowerCase().includes('sn') ||
-        k.toLowerCase().includes('s1')
-    ) || keys[0]
+    // Filter out empty values
+    const validEntries = Object.entries(seriesData).filter(([_, v]) => v && String(v).length > 2)
 
-    const mainSeriesValue = seriesData[mainSeriesKey]
+    if (validEntries.length === 0) return { isValid: false, material: null }
 
-    if (!mainSeriesValue) return { isValid: false, material: null }
+    let allValid = true
+    let foundMaterial: string | null = null
 
-    const { data: sapRecord } = await supabase
-        .from('sap_data')
-        .select('id, material')
-        .eq('series', mainSeriesValue)
-        .limit(1)
-        .maybeSingle()
+    // Check ALL valid series
+    for (const [key, value] of validEntries) {
+        const { data: sapRecord } = await supabase
+            .from('sap_data')
+            .select('id, material')
+            .eq('series', value)
+            .limit(1)
+            .maybeSingle()
+
+        if (!sapRecord) {
+            allValid = false
+            // Check if we should fail immediately or continue? 
+            // Usually if any series is invalid, the whole item is invalid for SAP.
+            break
+        }
+
+        // Capture material from the first valid record found (or overwrite, assuming consistent material for the unit)
+        if (!foundMaterial && sapRecord.material) {
+            foundMaterial = sapRecord.material
+        }
+    }
 
     return {
-        isValid: !!sapRecord,
-        material: sapRecord?.material || null
+        isValid: allValid,
+        material: foundMaterial
     }
 }
 

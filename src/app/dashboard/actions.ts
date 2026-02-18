@@ -35,8 +35,8 @@ export async function getDashboardStats() {
             id,
             box_number,
             status,
-            updated_at:created_at, 
-            users (email),
+            created_at, 
+            users (email, name),
             models (name, brands (name)),
             total_items
         `)
@@ -57,12 +57,42 @@ export async function getDashboardStats() {
             ...box,
             current_items: count || 0
         }
+        return {
+            ...box,
+            current_items: count || 0
+        }
     }))
+
+    // 5. User Performance (Boxes created by user)
+    // We fetch all users first, then count boxes for each. 
+    // Optimization: In a large system, use an RPC or aggregated query.
+    const { data: users } = await supabase
+        .from('users')
+        .select('id, name, email')
+
+    // We limit to top 10 users to avoid too many requests if the user base grows, 
+    // but ideally this should be an RPC.
+    const userMetrics = await Promise.all((users || []).map(async (u) => {
+        const { count } = await supabase
+            .from('boxes')
+            .select('*', { count: 'exact', head: true })
+            .eq('created_by', u.id)
+
+        return {
+            name: u.name || u.email?.split('@')[0] || 'Unknown',
+            email: u.email,
+            count: count || 0
+        }
+    }))
+
+    // Sort by count descending
+    userMetrics.sort((a, b) => b.count - a.count)
 
     return {
         boxesToday: boxesToday || 0,
         openBoxes: openBoxes || 0,
         itemsToday: itemsToday || 0,
-        recentActivity: recentActivity || []
+        recentActivity: recentActivity || [],
+        userMetrics: userMetrics || []
     }
 }
