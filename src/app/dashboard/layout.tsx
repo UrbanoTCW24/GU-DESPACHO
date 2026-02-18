@@ -13,12 +13,7 @@ import {
 import { CircleUser, Menu, Package2, Search } from 'lucide-react'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 
-async function signOut() {
-    'use server'
-    const supabase = await createClient()
-    await supabase.auth.signOut()
-    return redirect('/login')
-}
+
 
 export default async function DashboardLayout({
     children,
@@ -35,7 +30,7 @@ export default async function DashboardLayout({
     // Fetch role
     const { data: userData } = await supabase
         .from('users')
-        .select('role')
+        .select('role, name')
         .eq('id', user.id)
         .single()
 
@@ -162,14 +157,22 @@ export default async function DashboardLayout({
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
+                            <DropdownMenuLabel>
+                                <div className="flex flex-col space-y-1">
+                                    <p className="text-sm font-medium leading-none">{userData?.name || 'Usuario'}</p>
+                                    <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+                                </div>
+                            </DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem>Configuración</DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <form action={signOut}>
-                                <DropdownMenuItem asChild>
-                                    <button className="w-full text-left">Cerrar Sesión</button>
-                                </DropdownMenuItem>
+                            <form action={async () => {
+                                'use server'
+                                const supabase = await createClient()
+                                await supabase.auth.signOut()
+                                redirect('/login')
+                            }}>
+                                <button className="w-full text-left relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
+                                    Cerrar Sesión
+                                </button>
                             </form>
                         </DropdownMenuContent>
                     </DropdownMenu>
