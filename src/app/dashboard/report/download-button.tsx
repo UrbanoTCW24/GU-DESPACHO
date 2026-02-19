@@ -5,20 +5,21 @@ import { Download } from 'lucide-react'
 import { getGeneralReport } from './actions'
 import { useState, useRef } from 'react'
 import * as XLSX from 'xlsx'
+import { GlobalReportDialog } from './global-report-dialog'
 
 export function DownloadReportButton() {
     const downloadRef = useRef<HTMLAnchorElement>(null)
-    const [loading, setLoading] = useState(false)
+    const [loadingGeneral, setLoadingGeneral] = useState(false)
 
-    const handleDownload = async () => {
-        setLoading(true)
+    const handleDownloadGeneral = async () => {
+        setLoadingGeneral(true)
         try {
             // Fetch all data
             const data = await getGeneralReport(0)
 
             if (!data || data.length === 0) {
                 alert('No hay datos para exportar')
-                setLoading(false)
+                setLoadingGeneral(false)
                 return
             }
 
@@ -56,63 +57,61 @@ export function DownloadReportButton() {
                 return row
             })
 
-            // Create Worksheet
-            const worksheet = XLSX.utils.json_to_sheet(excelRows)
-
-            // Adjust column widths (auto width based on headers approx)
-            const wscols = [
+            generateExcel(excelRows, 'Reporte_General', [
                 { wch: 20 }, // Fecha
                 { wch: 15 }, // Caja
                 { wch: 15 }, // Marca
                 { wch: 20 }, // Modelo
                 { wch: 20 }, // Material
-            ]
-
-            // Add width for dynamic series columns
-            for (let i = 0; i < maxSeriesCount; i++) {
-                wscols.push({ wch: 25 })
-            }
-
-            // Add widths for final duplicate static columns if any (Usuario, Estado)
-            wscols.push({ wch: 30 }) // Usuario
-            wscols.push({ wch: 15 }) // Estado
-            worksheet['!cols'] = wscols
-
-            // Create Workbook
-            const workbook = XLSX.utils.book_new()
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Reporte General")
-
-            // Generate buffer manually
-            const wbout = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' })
-            const blob = new Blob([wbout], { type: 'application/octet-stream' })
-            const url = URL.createObjectURL(blob)
-
-            // Use React-controlled anchor
-            if (downloadRef.current) {
-                downloadRef.current.href = url
-                downloadRef.current.download = `Reporte_General_${new Date().toISOString().split('T')[0]}.xlsx`
-                downloadRef.current.click()
-
-                // Cleanup URL after a delay
-                setTimeout(() => {
-                    window.URL.revokeObjectURL(url)
-                }, 1000)
-            }
+            ])
 
         } catch (error) {
             console.error('Error exporting:', error)
             alert('Error al generar el Excel')
         }
-        setLoading(false)
+        setLoadingGeneral(false)
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const generateExcel = (rows: any[], fileNamePrefix: string, colWidths: any[]) => {
+        // Create Worksheet
+        const worksheet = XLSX.utils.json_to_sheet(rows)
+
+        // Adjust column widths
+        worksheet['!cols'] = colWidths
+
+        // Create Workbook
+        const workbook = XLSX.utils.book_new()
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Reporte")
+
+        // Generate buffer manually
+        const wbout = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' })
+        const blob = new Blob([wbout], { type: 'application/octet-stream' })
+        const url = URL.createObjectURL(blob)
+
+        // Use React-controlled anchor
+        if (downloadRef.current) {
+            downloadRef.current.href = url
+            downloadRef.current.download = `${fileNamePrefix}_${new Date().toISOString().split('T')[0]}.xlsx`
+            downloadRef.current.click()
+
+            // Cleanup URL after a delay
+            setTimeout(() => {
+                window.URL.revokeObjectURL(url)
+            }, 1000)
+        }
     }
 
     return (
-        <>
-            <Button onClick={handleDownload} disabled={loading} variant="outline" className="gap-2 bg-green-50 text-green-700 hover:bg-green-100 hover:text-green-800 border-green-200">
+        <div className="flex gap-2">
+            <Button onClick={handleDownloadGeneral} disabled={loadingGeneral} variant="outline" className="gap-2 bg-green-50 text-green-700 hover:bg-green-100 hover:text-green-800 border-green-200">
                 <Download className="h-4 w-4" />
-                {loading ? 'Generando...' : 'Descargar Excel (.xlsx)'}
+                {loadingGeneral ? 'Generando...' : 'Reporte General (.xlsx)'}
             </Button>
+
+            <GlobalReportDialog />
+
             <a ref={downloadRef} className="hidden" />
-        </>
+        </div>
     )
 }
