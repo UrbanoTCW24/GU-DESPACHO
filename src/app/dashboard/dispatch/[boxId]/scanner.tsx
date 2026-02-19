@@ -106,7 +106,13 @@ export default function Scanner({ boxId, modelConfig, items, totalTarget, status
             // Focus first input (or the one that caused error if we knew)
             inputRefs.current[0]?.select()
         } else {
-            toast.success("Equipo agregado")
+            if (result.warning) {
+                // Secondary Validation Warning
+                toast.warning(result.warning, { duration: 5000 })
+            } else {
+                toast.success("Equipo agregado (Validación SAP OK)")
+            }
+
             setInputs({}) // Clear inputs
             // Small delay to ensure focus works after state update
             setTimeout(() => inputRefs.current[0]?.focus(), 10)
@@ -381,24 +387,35 @@ export default function Scanner({ boxId, modelConfig, items, totalTarget, status
                                         <TableCell className="font-mono text-xs">{items.length - i}</TableCell>
                                         <TableCell>
                                             {item.is_sap_validated ? (
-                                                <Badge variant="default" className="bg-green-500 hover:bg-green-600">OK</Badge>
+                                                <Badge variant="default" className="bg-green-500 hover:bg-green-600">
+                                                    OK {(item.matched_position && item.matched_position !== 'SN-1' && item.matched_position !== 'S-1') ? `(${item.matched_position})` : ''}
+                                                </Badge>
                                             ) : (
-                                                <Badge variant="outline" className="text-yellow-600 border-yellow-600">Pending</Badge>
+                                                <Badge variant="destructive">No SAP</Badge>
                                             )}
                                         </TableCell>
                                         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                                         {fields.map((f: any) => {
                                             const val = item.series_data[f.name]
-                                            const isValid = validSeries?.includes(String(val).trim())
+                                            // Check if this specific field is the one that matched
+                                            const isMatchedField = item.matched_position === f.name
+                                            const isVerified = item.is_sap_validated && isMatchedField
+
+                                            // Determine dot color
+                                            let dotColor = "bg-gray-300"
+                                            if (item.is_sap_validated) {
+                                                if (isMatchedField) {
+                                                    dotColor = item.validation_type === 'secondary' ? "bg-yellow-500" : "bg-green-500"
+                                                }
+                                            } else {
+                                                dotColor = "bg-red-500"
+                                            }
+
                                             return (
                                                 <TableCell key={f.name} className="font-medium">
                                                     <div className="flex items-center gap-1">
-                                                        {isValid ? (
-                                                            <div className="h-2 w-2 rounded-full bg-green-500" title="Validado en SAP" />
-                                                        ) : (
-                                                            <div className="h-2 w-2 rounded-full bg-yellow-500" title="No encontrado en SAP" />
-                                                        )}
-                                                        <span className={isValid ? "text-green-700" : "text-yellow-700"}>
+                                                        <div className={`h-2 w-2 rounded-full ${dotColor}`} title={isVerified ? "Match SAP" : ""} />
+                                                        <span className={isVerified ? (item.validation_type === 'secondary' ? "text-yellow-700 font-bold" : "text-green-700 font-bold") : "text-zinc-600"}>
                                                             {val}
                                                         </span>
                                                     </div>
@@ -417,7 +434,7 @@ export default function Scanner({ boxId, modelConfig, items, totalTarget, status
                                 ))}
                                 {items.length === 0 && (
                                     <TableRow>
-                                        <TableCell colSpan={fields.length + 3} className="text-center text-muted-foreground py-8">
+                                        <TableCell colSpan={fields.length + 4} className="text-center text-muted-foreground py-8">
                                             Escanea el primer equipo para comenzar
                                         </TableCell>
                                     </TableRow>

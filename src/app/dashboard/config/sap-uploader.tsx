@@ -54,10 +54,10 @@ export function SAPUploader() {
     }
 
     const handleDownloadTemplate = () => {
-        const headers = ['Serie', 'Material', 'Estado (Opcional)']
+        const headers = ['SN-1 (Requerido)', 'SN-2 (Opcional)', 'SN-3 (Opcional)', 'SN-4 (Opcional)', 'Material', 'Estado']
         const rows = [
-            ['S123456789', 'MAT-001', 'disponible'],
-            ['S987654321', 'MAT-002', 'pendiente']
+            ['S123456789', 'S999888777', '', '', 'MAT-001', 'disponible'],
+            ['S987654321', '', '', '', 'MAT-002', 'pendiente']
         ]
 
         const csvContent = [
@@ -69,7 +69,7 @@ export function SAPUploader() {
         const url = URL.createObjectURL(blob)
         const link = document.createElement('a')
         link.href = url
-        link.setAttribute('download', 'plantilla_carga_sap.csv')
+        link.setAttribute('download', 'plantilla_carga_sap_v2.csv')
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
@@ -81,7 +81,7 @@ export function SAPUploader() {
                 <div className="flex justify-between items-start">
                     <div>
                         <CardTitle className="flex items-center gap-2">
-                            Carga de Data SAP
+                            Carga de Data SAP (Multi-Series)
                             {recordCount !== null && (
                                 <Badge variant="secondary" className="text-xs font-normal">
                                     <Database className="h-3 w-3 mr-1" />
@@ -90,8 +90,11 @@ export function SAPUploader() {
                             )}
                         </CardTitle>
                         <CardDescription>
-                            Sube un archivo Excel (.xlsx, .xls) o CSV con las series válidas. <br />
-                            Estructura: <strong>Serie</strong> (Requerido), <strong>Material</strong> (Requerido), <strong>Estado</strong> (Opcional).
+                            Sube un archivo Excel (.xlsx) o CSV con las series válidas. <br />
+                            Estructura de Columnas: <br />
+                            1. <strong>SN-1</strong> (Principal - Requerido) <br />
+                            2. <strong>SN-2, SN-3, SN-4</strong> (Secundarios - Opcionales) <br />
+                            3. <strong>Material</strong>, <strong>Estado</strong>.
                         </CardDescription>
                     </div>
                     <Button variant="outline" size="sm" onClick={handleDownloadTemplate}>

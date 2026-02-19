@@ -33,25 +33,32 @@ export async function uploadSAPData(formData: FormData) {
         // Or just look for data rows.
 
         const startIndex = jsonData.findIndex(row =>
-            row.some((cell: any) => String(cell).toLowerCase().includes('serie'))
+            row.some((cell: any) => String(cell).toLowerCase().includes('serie') || String(cell).toLowerCase().includes('sn-1'))
         )
-
-        // If header found, start from next row. If not, start from 0? 
-        // User request implies specific structure: Serie, Material, Estado.
-        // Let's assume strict columnar order if no header, or map by header index if present.
 
         const dataRows = (startIndex !== -1) ? jsonData.slice(startIndex + 1) : jsonData
 
         records = dataRows
-            .filter(row => row && row.length > 0 && row[0]) // Ensure first col (Serie) exists
+            .filter(row => row && row.length > 0 && row[0]) // Ensure first col (SN1) exists
             .map(row => {
+                // Mapping: 
+                // Col 0: SN-1 (Mandatory)
+                // Col 1: SN-2 (Optional)
+                // Col 2: SN-3 (Optional)
+                // Col 3: SN-4 (Optional)
+                // Col 4: Material (Optional)
+                // Col 5: Status (Optional)
+
                 return {
-                    series: String(row[0]).trim(),
-                    material: row[1] ? String(row[1]).trim() : null,
-                    status: row[2] ? String(row[2]).trim() : 'disponible'
+                    sn1: String(row[0]).trim(),
+                    sn2: row[1] ? String(row[1]).trim() : null,
+                    sn3: row[2] ? String(row[2]).trim() : null,
+                    sn4: row[3] ? String(row[3]).trim() : null,
+                    material: row[4] ? String(row[4]).trim() : null,
+                    status: row[5] ? String(row[5]).trim() : 'disponible'
                 }
             })
-            .filter(r => r.series.length > 0)
+            .filter(r => r.sn1.length > 0)
 
     } catch (error) {
         console.error("Excel parse error", error)
@@ -62,34 +69,24 @@ export async function uploadSAPData(formData: FormData) {
         return { error: 'No se encontraron registros validos en el archivo.' }
     }
 
-    // Check Auth
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
-        console.error("Auth error", authError)
-        return { error: 'Usuario no autenticado. Por favor inicie sesión nuevamente.' }
+        return { error: 'Usuario no autenticado.' }
     }
-
-    // Bulk insert (chunking might be needed for very large files, but start simple)
-    // Supabase generic limit is often 1000s, usually handles 10k ok? 
-    // Let's do batches of 1000 to be safe.
 
     const BATCH_SIZE = 1000
     let insertedCount = 0
-    let errorCount = 0
 
     for (let i = 0; i < records.length; i += BATCH_SIZE) {
         const batch = records.slice(i, i + BATCH_SIZE)
         const { error } = await supabase
-            .from('sap_data')
+            .from('sap_base') // Target new table
             .insert(batch)
 
         if (error) {
             console.error("Insert error", error)
-            // Continue? Or abort? 
-            // Ideally we want atomic, but big files atomic is hard.
-            // Let's return first error for now.
             if (error.code === '42501') {
-                return { error: 'Permisos insuficientes (RLS). Contacte al administrador para habilitar la inserción en "sap_data".' }
+                return { error: 'Permisos insuficientes (RLS).' }
             }
             return { error: `Error insertando lote ${i}: ${error.message}` }
         }

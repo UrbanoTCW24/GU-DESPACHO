@@ -59,6 +59,8 @@ export async function getBoxDetails(boxId: string) {
 
 type SeriesData = Record<string, string>
 
+// --- Helper Functions ---
+
 function validateLocalDuplicates(seriesData: SeriesData): string | null {
     const values = Object.values(seriesData).filter(v => v && String(v).length > 2)
     const uniqueValues = new Set(values)
@@ -92,41 +94,56 @@ async function validateGlobalDuplicates(supabase: SupabaseClient, seriesData: Se
     return null
 }
 
-async function checkSapValidation(supabase: SupabaseClient, seriesData: SeriesData): Promise<{ isValid: boolean, material: string | null }> {
-    const keys = Object.keys(seriesData)
-    // Filter out empty values
-    const validEntries = Object.entries(seriesData).filter(([_, v]) => v && String(v).length > 2)
+type ValidationResult = {
+    status: 'valid' | 'warning' | 'error'
+    message?: string
+    material?: string
+    matchedSnValue?: string
+    matchedPosition?: string
+    validationType?: 'primary' | 'secondary' | 'none'
+    isSapValidated: boolean
+}
 
-    if (validEntries.length === 0) return { isValid: false, material: null }
+async function checkSapValidation(supabase: SupabaseClient, seriesData: SeriesData): Promise<ValidationResult> {
+    // Defines Priority Order (Support both SN-X and S-X formats)
+    const priorityOrder = ['SN-1', 'S-1', 'SN-2', 'S-2', 'SN-3', 'S-3', 'SN-4', 'S-4']
 
-    let allValid = true
-    let foundMaterial: string | null = null
+    // Check in order: The FIRST one that matches SAP wins.
+    for (const key of priorityOrder) {
+        let value = seriesData[key]
+        if (!value || value.length < 3) continue
 
-    // Check ALL valid series
-    for (const [key, value] of validEntries) {
+        // Normalize: Upper case and remove ALL whitespace (including internal spaces if any)
+        value = String(value).toUpperCase().replace(/\s+/g, '')
+
+        // Query SAP DATA
         const { data: sapRecord } = await supabase
             .from('sap_data')
-            .select('id, material')
+            .select('series, material, status')
             .eq('series', value)
             .limit(1)
             .maybeSingle()
 
-        if (!sapRecord) {
-            allValid = false
-            // Check if we should fail immediately or continue? 
-            // Usually if any series is invalid, the whole item is invalid for SAP.
-            break
-        }
-
-        // Capture material from the first valid record found (or overwrite, assuming consistent material for the unit)
-        if (!foundMaterial && sapRecord.material) {
-            foundMaterial = sapRecord.material
+        if (sapRecord) {
+            // Match Found! (Any key is valid)
+            return {
+                status: 'valid',
+                material: sapRecord.material,
+                matchedSnValue: value,
+                matchedPosition: key, // Keep track of which key matched
+                validationType: 'primary', // Treat all as primary/valid for UI
+                isSapValidated: true
+            }
         }
     }
 
+    // Case 3: No Match Found in any key
+    const searchedKeys = priorityOrder.filter(k => seriesData[k]).map(k => `${k}: ${seriesData[k]}`).join(' / ')
     return {
-        isValid: allValid,
-        material: foundMaterial
+        status: 'error',
+        message: `Error: La serie escaneada no existe en SAP. (Se buscó: ${searchedKeys || 'Ninguna serie válida recibida'})`,
+        isSapValidated: false,
+        validationType: 'none'
     }
 }
 
@@ -145,14 +162,10 @@ async function registerSeriesGlobally(supabase: SupabaseClient, seriesData: Seri
         if (registryError) {
             // Rollback: Delete the equipment we just created
             await supabase.from('equipment').delete().eq('id', equipmentId)
-
-            if (registryError.code === '23505') { // Unique violation
-                return `La serie ${val} YA EXISTE en el sistema (Validación Global).`
-            }
             return `Error registrando serie ${val}: ${registryError.message}`
         }
     }
-    return null // Success
+    return null
 }
 
 // --- Main Actions ---
@@ -167,12 +180,17 @@ export async function addEquipment(boxId: string, seriesData: SeriesData) {
     const localError = validateLocalDuplicates(seriesData)
     if (localError) return { error: localError }
 
-    // 2. Global DB Validation (Check if exists in equipment table)
+    // 2. Global DB Validation (Check if exists in other boxes)
     const globalError = await validateGlobalDuplicates(supabase, seriesData)
     if (globalError) return { error: globalError }
 
-    // 3. SAP Validation
-    const { isValid: isSapValidated, material } = await checkSapValidation(supabase, seriesData)
+    // 3. SAP Validation (Strict Sequential)
+    const sapResult = await checkSapValidation(supabase, seriesData)
+
+    if (sapResult.status === 'error') {
+        // BLOCK THE ACTION
+        return { error: sapResult.message }
+    }
 
     // 4. Insert Item
     const { data: equipmentData, error: equipmentError } = await supabase
@@ -181,20 +199,30 @@ export async function addEquipment(boxId: string, seriesData: SeriesData) {
             box_id: boxId,
             series_data: seriesData,
             scanned_by: user.id,
-            is_sap_validated: isSapValidated,
-            material: material // Insert the found material
+            is_sap_validated: sapResult.isSapValidated,
+            material: sapResult.material,
+            matched_sn_value: sapResult.matchedSnValue,
+            matched_position: sapResult.matchedPosition,
+            validation_type: sapResult.validationType
         })
         .select()
         .single()
 
     if (equipmentError) return { error: equipmentError.message }
 
-    // 5. Register in Global Registry (Strict Constraint)
+    // 5. Register in Global Registry 
     const registryError = await registerSeriesGlobally(supabase, seriesData, equipmentData.id, boxId)
     if (registryError) return { error: registryError }
 
     revalidatePath(`/dashboard/dispatch/${boxId}`)
-    return { success: true, isSapValidated }
+
+    // Return success with extra info for UI
+    return {
+        success: true,
+        warning: sapResult.status === 'warning' ? sapResult.message : undefined,
+        isSapValidated: sapResult.isSapValidated,
+        matchedPosition: sapResult.matchedPosition
+    }
 }
 
 export async function deleteEquipment(itemId: string, boxId: string) {
