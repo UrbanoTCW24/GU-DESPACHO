@@ -15,11 +15,16 @@ export async function getTotalEquipment() {
 export async function getGeneralReport(limit = 100) {
     const supabase = await createClient()
 
-    const { data, error } = await supabase
+    let query = supabase
         .from('equipment')
-        .select('*, boxes(box_number, models(name, brands(name))), users:users!equipment_scanned_by_fkey(email, name)')
+        .select('*, boxes:boxes(box_number, models(name, brands(name))), users:users!equipment_scanned_by_fkey(email, name)')
         .order('scanned_at', { ascending: false })
-        .limit(limit)
+
+    if (limit > 0) {
+        query = query.limit(limit)
+    }
+
+    const { data, error } = await query
 
     if (error) {
         console.error('Error fetching report:', JSON.stringify(error, null, 2))

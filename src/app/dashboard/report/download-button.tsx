@@ -14,7 +14,7 @@ export function DownloadReportButton() {
         setLoading(true)
         try {
             // Fetch all data
-            const data = await getGeneralReport(1000)
+            const data = await getGeneralReport(0)
 
             if (!data || data.length === 0) {
                 alert('No hay datos para exportar')
