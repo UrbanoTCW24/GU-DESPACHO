@@ -12,55 +12,106 @@ export async function getTotalEquipment() {
     return count || 0
 }
 
-export async function getGeneralReport(limit = 100) {
+export async function getGeneralReport(
+    limit = 100, // Kept for backward compatibility, but acting as pageSize if page is provided
+    page?: number,
+    filters?: { brand?: string; model?: string; material?: string }
+) {
     const supabase = await createClient()
 
     let query = supabase
         .from('equipment')
-        .select('*, boxes:boxes(box_number, models(name, brands(name))), users:users!equipment_scanned_by_fkey(email, name)')
+        .select(`
+            *,
+            boxes!inner (
+                box_number,
+                models!inner (
+                    name,
+                    brands!inner (
+                        name
+                    )
+                )
+            ),
+            users:users!equipment_scanned_by_fkey(email, name)
+        `, { count: 'exact' })
         .order('scanned_at', { ascending: false })
 
-    let allData: any[] = []
-    let page = 0
-    const pageSize = 1000
+    // Apply Filters
+    if (filters?.brand && filters.brand !== 'all') {
+        query = query.eq('boxes.models.brands.name', filters.brand)
+    }
+    if (filters?.model && filters.model !== 'all') {
+        query = query.eq('boxes.models.name', filters.model)
+    }
+    if (filters?.material && filters.material !== 'all') {
+        query = query.eq('material', filters.material)
+    }
 
-    if (limit > 0) {
-        query = query.limit(limit)
-        const { data, error } = await query
-        if (error) {
-            console.error('Error fetching report:', JSON.stringify(error, null, 2))
-            return []
-        }
-        return data
-    } else {
-        // Fetch all data using pagination
+    // Handle "Select All" for export (limit 0) - Kept logic for download button using this
+    if (limit === 0) {
+        // Warning: This export logic with filters needs to reuse the same query but fetch all.
+        // If limit is 0, we fetch EVERYTHING (paginated internally if needed for performance, but returning allData).
+        // Reuse the logic but apply filters.
+
+        // For simplicity, let's just use the query with high limit or internal pagination if we really expect >10k rows with filters.
+        // But since we had a special loop for limit=0 before, let's adapt it.
+        // Actually, the download button can just request a high limit or we can iterate.
+        // Let's keep the iteration logic for limit=0 but WITH FILTERS.
+
+        let allData: any[] = []
+        let p = 0
+        const pageSize = 1000
+
         while (true) {
-            const { data, error } = await supabase
+            // Re-construct query builder for each page to avoid state issues with .range()
+            let q = supabase
                 .from('equipment')
-                .select('*, boxes:boxes(box_number, models(name, brands(name))), users:users!equipment_scanned_by_fkey(email, name)')
+                .select(`
+                    *,
+                    boxes!inner (
+                        box_number, 
+                        models!inner (
+                            name, 
+                            brands!inner (
+                                name
+                            )
+                        )
+                    ),
+                    users:users!equipment_scanned_by_fkey(email, name)
+                `)
                 .order('scanned_at', { ascending: false })
-                .range(page * pageSize, (page + 1) * pageSize - 1)
+
+            if (filters?.brand && filters.brand !== 'all') q = q.eq('boxes.models.brands.name', filters.brand)
+            if (filters?.model && filters.model !== 'all') q = q.eq('boxes.models.name', filters.model)
+            if (filters?.material && filters.material !== 'all') q = q.eq('material', filters.material)
+
+            const { data, error } = await q.range(p * pageSize, (p + 1) * pageSize - 1)
 
             if (error) {
-                console.error('Error fetching report page:', page, JSON.stringify(error, null, 2))
+                console.error('Error fetching report page:', p, JSON.stringify(error, null, 2))
                 break
             }
-
-            if (!data || data.length === 0) {
-                break
-            }
-
+            if (!data || data.length === 0) break
             allData = [...allData, ...data]
-
-            if (data.length < pageSize) {
-                break
-            }
-
-            page++
-
+            if (data.length < pageSize) break
+            p++
         }
         return allData
     }
+
+    // Normal Pagination
+    const effectivePage = page && page > 0 ? page : 1
+    const from = (effectivePage - 1) * limit
+    const to = from + limit - 1
+
+    const { data, error, count } = await query.range(from, to)
+
+    if (error) {
+        console.error('Error fetching report:', JSON.stringify(error, null, 2))
+        return { data: [], count: 0 }
+    }
+
+    return { data, count }
 }
 
 

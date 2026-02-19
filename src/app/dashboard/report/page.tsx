@@ -9,13 +9,41 @@ import {
     TableRow,
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
-import { getGeneralReport, getTotalEquipment } from './actions'
+
+import { getGeneralReport, getTotalEquipment, getFilterOptions } from './actions'
 import { DownloadReportButton } from './download-button'
 import { DeleteBoxButton } from '@/components/delete-box-button'
+import { Pagination } from '@/components/ui/pagination'
+import { ReportFilters } from './report-filters'
 
-export default async function ReportPage() {
-    const reportData = await getGeneralReport(200)
+export default async function ReportPage({
+    searchParams,
+}: {
+    searchParams: { [key: string]: string | string[] | undefined }
+}) {
+    const page = Number(searchParams.page) || 1
+    const pageSize = 20 // Default page size for viewing
+    const brand = searchParams.brand as string
+    const model = searchParams.model as string
+    const material = searchParams.material as string
+
+    const filters = { brand, model, material }
+
+    const result = await getGeneralReport(pageSize, page, filters)
+
+    // Handle both return types for backward compatibility
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const reportData = Array.isArray(result) ? result : (result as any).data || []
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const count = Array.isArray(result) ? result.length : (result as any).count || 0
     const totalEquipment = await getTotalEquipment()
+    const filterOptions = await getFilterOptions()
+
+    // Calculate total pages for pagination
+    // Note: count is total records matching query.
+    // getGeneralReport returns { data, count } now.
+    const totalPages = Math.ceil((count || 0) / pageSize)
+
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     let isSuperAdmin = false
@@ -62,9 +90,16 @@ export default async function ReportPage() {
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Detalle de Equipos Registrados</CardTitle>
+                    <div className="flex justify-between items-center">
+                        <CardTitle>Detalle de Equipos Registrados</CardTitle>
+                        {/* We will implement ReportFilters component next or inline it temporarily if simple */}
+                    </div>
                 </CardHeader>
                 <CardContent>
+                    <div className="mb-4">
+                        <ReportFilters options={filterOptions} />
+                    </div>
+
                     <div className="rounded-md border">
                         <Table>
                             <TableHeader>
@@ -155,8 +190,18 @@ export default async function ReportPage() {
                             </TableBody>
                         </Table>
                     </div>
+
+                    <div className="mt-4">
+                        <Pagination
+                            totalPages={totalPages}
+                            currentPage={page}
+                            totalRecords={count || 0}
+                            pageSize={pageSize}
+                        />
+                    </div>
                 </CardContent>
             </Card>
         </div>
     )
 }
+
