@@ -7,7 +7,7 @@ export async function getTotalEquipment() {
     const { count, error } = await supabase
         .from('equipment')
         .select('*, boxes!inner(status)', { count: 'exact', head: true })
-        .neq('boxes.status', 'dispatched')
+        .in('boxes.status', ['closed', 'dispatched'])
 
     if (error) return 0
     return count || 0
@@ -35,7 +35,7 @@ export async function getGeneralReport(
             ),
             users:users!equipment_scanned_by_fkey(email, name)
         `, { count: 'exact' })
-        .neq('boxes.status', 'dispatched') // Only show equipment in active (non-dispatched) boxes
+        .in('boxes.status', ['closed', 'dispatched']) // Only show equipment from closed or dispatched boxes
         .order('scanned_at', { ascending: false })
 
     // Apply Filters
@@ -82,6 +82,7 @@ export async function getGeneralReport(
                     users:users!equipment_scanned_by_fkey(email, name)
                 `)
                 .order('scanned_at', { ascending: false })
+                .in('boxes.status', ['closed', 'dispatched'])
 
             if (filters?.brand && filters.brand !== 'all') q = q.eq('boxes.models.brands.name', filters.brand)
             if (filters?.model && filters.model !== 'all') q = q.eq('boxes.models.name', filters.model)

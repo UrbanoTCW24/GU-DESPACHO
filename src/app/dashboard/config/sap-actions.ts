@@ -27,23 +27,47 @@ export async function uploadSAPData(formData: FormData) {
         const firstSheetName = workbook.SheetNames[0]
         const worksheet = workbook.Sheets[firstSheetName]
 
-        // Read as array of arrays — most reliable for any Excel/CSV file
+        // Read as array of arrays
         const jsonData = utils.sheet_to_json<any[]>(worksheet, { header: 1, defval: null })
 
         console.log(`[SAP Upload] Total rows in file (including header): ${jsonData.length}`)
 
-        // Skip row 0 (header: SN-1 | Material | Lote) — always present
+        if (jsonData.length < 2) {
+            return { error: 'El archivo está vacío o solo tiene encabezados.' }
+        }
+
+        // ── Auto-detect column positions from the header row ──
+        const headerRow = (jsonData[0] as any[]).map((h: any) =>
+            h != null ? String(h).toLowerCase().trim() : ''
+        )
+
+        // SN-1 column: look for "sn-1", "sn1", "serie", "series"
+        const snIndex = headerRow.findIndex(h =>
+            h.includes('sn-1') || h === 'sn1' || h === 'serie' || h === 'series' || h === 'serial'
+        )
+        // Material column: look for "material", "mat"
+        const matIndex = headerRow.findIndex(h =>
+            h.includes('material') || h === 'mat'
+        )
+        // Lote / Status column
+        const loteIndex = headerRow.findIndex(h =>
+            h.includes('lote') || h.includes('status') || h.includes('estado')
+        )
+
+        const seriesCol = snIndex >= 0 ? snIndex : 0
+        const materialCol = matIndex >= 0 ? matIndex : (snIndex === 0 ? 1 : 0)
+        const loteCol = loteIndex >= 0 ? loteIndex : -1
+
+        console.log(`[SAP Upload] Column mapping → series: col ${seriesCol} (${headerRow[seriesCol]}), material: col ${materialCol} (${headerRow[materialCol]}), lote: col ${loteCol}`)
+
         const dataRows = jsonData.slice(1)
 
         records = dataRows
-            .filter((row: any[]) => row && row[0] != null && String(row[0]).trim().length > 0)
+            .filter((row: any[]) => row && row[seriesCol] != null && String(row[seriesCol]).trim().length > 0)
             .map((row: any[]) => ({
-                // Col A (0): SN-1  →  series
-                // Col B (1): Material
-                // Col C (2): Lote  →  stored in status field
-                series: String(row[0]).trim().toUpperCase(),
-                material: row[1] != null ? String(row[1]).trim() : null,
-                status: row[2] != null ? String(row[2]).trim() : 'disponible',
+                series: String(row[seriesCol]).trim().toUpperCase(),
+                material: row[materialCol] != null ? String(row[materialCol]).trim() : null,
+                status: loteCol >= 0 && row[loteCol] != null ? String(row[loteCol]).trim() : 'disponible',
             }))
 
         console.log(`[SAP Upload] Valid records to insert: ${records.length}`)

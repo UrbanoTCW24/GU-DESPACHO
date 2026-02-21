@@ -31,7 +31,7 @@ export function Pagination({ totalPages, currentPage, totalRecords, pageSize }: 
 
     return (
         <div className="flex items-center justify-between px-2 py-4">
-            <div className="text-sm text-muted-foreground">
+            <div className="text-sm text-muted-foreground" suppressHydrationWarning>
                 Mostrando {startRecord} a {endRecord} de {totalRecords} registros
             </div>
             <div className="flex items-center space-x-2">
@@ -53,7 +53,7 @@ export function Pagination({ totalPages, currentPage, totalRecords, pageSize }: 
                     <span className="sr-only">Página anterior</span>
                     <ChevronLeft className="h-4 w-4" />
                 </Button>
-                <div className="text-sm font-medium">
+                <div className="text-sm font-medium" suppressHydrationWarning>
                     Página {currentPage} de {totalPages}
                 </div>
                 <Button

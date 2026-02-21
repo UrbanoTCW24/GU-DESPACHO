@@ -82,7 +82,7 @@ export default async function ReportPage({
                     <CardContent>
                         <div className="text-2xl font-bold text-slate-800">{totalEquipment}</div>
                         <p className="text-xs text-muted-foreground">
-                            Equipos activos sin despachar
+                            Equipos en cajas cerradas
                         </p>
                     </CardContent>
                 </Card>
@@ -119,11 +119,12 @@ export default async function ReportPage({
                             <TableBody>
                                 {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                                 {reportData.map((item: any) => {
-                                    // Extract series values
-                                    const seriesValues = Object.values(item.series_data || {})
-                                    const primarySeries = seriesValues[0] as string || '-'
-                                    // Get all other series as an array
-                                    const additionalSeries = seriesValues.slice(1) as string[]
+                                    // Serie SAP / Principal = the series that matched in SAP
+                                    const primarySeries = item.matched_sn_value || Object.values(item.series_data || {})[0] as string || '-'
+                                    // Additional series = all other series_data values (excluding the SAP-matched one)
+                                    const additionalSeries = Object.values(item.series_data || {})
+                                        .map(v => String(v))
+                                        .filter(v => v && v.toUpperCase() !== primarySeries?.toUpperCase()) as string[]
 
                                     // Material from SAP validation
                                     const material = item.material || '-'
