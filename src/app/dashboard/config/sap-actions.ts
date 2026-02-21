@@ -39,26 +39,26 @@ export async function uploadSAPData(formData: FormData) {
         const dataRows = (startIndex !== -1) ? jsonData.slice(startIndex + 1) : jsonData
 
         records = dataRows
-            .filter(row => row && row.length > 0 && row[0]) // Ensure first col (SN1) exists
-            .map(row => {
-                // Mapping: 
-                // Col 0: SN-1 (Mandatory)
-                // Col 1: SN-2 (Optional)
-                // Col 2: SN-3 (Optional)
-                // Col 3: SN-4 (Optional)
-                // Col 4: Material (Optional)
-                // Col 5: Status (Optional)
+            .filter((row: any[]) => row && row.length > 0 && row[0])
+            .flatMap((row: any[]) => {
+                // Each SAP row can have multiple series (SN-1, SN-2, SN-3, SN-4)
+                // sap_data stores one series per row with its material
+                // Col 0: SN-1 | Col 1: SN-2 | Col 2: SN-3 | Col 3: SN-4 | Col 4: Material | Col 5: Status
+                const material = row[4] ? String(row[4]).trim() : null
+                const status = row[5] ? String(row[5]).trim() : 'disponible'
+                const entries: any[] = []
 
-                return {
-                    sn1: String(row[0]).trim(),
-                    sn2: row[1] ? String(row[1]).trim() : null,
-                    sn3: row[2] ? String(row[2]).trim() : null,
-                    sn4: row[3] ? String(row[3]).trim() : null,
-                    material: row[4] ? String(row[4]).trim() : null,
-                    status: row[5] ? String(row[5]).trim() : 'disponible'
+                for (let col = 0; col <= 3; col++) {
+                    if (row[col]) {
+                        const series = String(row[col]).trim().toUpperCase()
+                        if (series.length > 0) {
+                            entries.push({ series, material, status })
+                        }
+                    }
                 }
+                return entries
             })
-            .filter(r => r.sn1.length > 0)
+            .filter((r: any) => r.series && r.series.length > 0)
 
     } catch (error) {
         console.error("Excel parse error", error)
@@ -80,8 +80,8 @@ export async function uploadSAPData(formData: FormData) {
     for (let i = 0; i < records.length; i += BATCH_SIZE) {
         const batch = records.slice(i, i + BATCH_SIZE)
         const { error } = await supabase
-            .from('sap_base') // Target new table
-            .insert(batch)
+            .from('sap_data')
+            .upsert(batch, { onConflict: 'series', ignoreDuplicates: true })
 
         if (error) {
             console.error("Insert error", error)
