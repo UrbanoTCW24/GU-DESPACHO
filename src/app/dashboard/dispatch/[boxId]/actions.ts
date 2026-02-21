@@ -105,18 +105,13 @@ type ValidationResult = {
 }
 
 async function checkSapValidation(supabase: SupabaseClient, seriesData: SeriesData): Promise<ValidationResult> {
-    // Defines Priority Order (Support both SN-X and S-X formats)
-    const priorityOrder = ['SN-1', 'S-1', 'SN-2', 'S-2', 'SN-3', 'S-3', 'SN-4', 'S-4']
+    // Try matching ANY field value against sap_data — supports any model field naming
+    // (SN-1, S-1, Serie, SN1, etc.)
+    const entries = Object.entries(seriesData).filter(([, v]) => v && String(v).trim().length >= 3)
 
-    // Check in order: The FIRST one that matches SAP wins.
-    for (const key of priorityOrder) {
-        let value = seriesData[key]
-        if (!value || value.length < 3) continue
+    for (const [key, rawValue] of entries) {
+        const value = String(rawValue).toUpperCase().replace(/\s+/g, '')
 
-        // Normalize: Upper case and remove ALL whitespace (including internal spaces if any)
-        value = String(value).toUpperCase().replace(/\s+/g, '')
-
-        // Query SAP DATA
         const { data: sapRecord } = await supabase
             .from('sap_data')
             .select('series, material, status')
@@ -125,23 +120,22 @@ async function checkSapValidation(supabase: SupabaseClient, seriesData: SeriesDa
             .maybeSingle()
 
         if (sapRecord) {
-            // Match Found! (Any key is valid)
             return {
                 status: 'valid',
                 material: sapRecord.material,
                 matchedSnValue: value,
-                matchedPosition: key, // Keep track of which key matched
-                validationType: 'primary', // Treat all as primary/valid for UI
+                matchedPosition: key,
+                validationType: 'primary',
                 isSapValidated: true
             }
         }
     }
 
-    // Case 3: No Match Found — save as non-validated (don't block)
-    const searchedKeys = priorityOrder.filter(k => seriesData[k]).map(k => `${k}: ${seriesData[k]}`).join(' / ')
+    // No match found in any field
+    const searched = entries.map(([k, v]) => `${k}: ${v}`).join(' / ')
     return {
         status: 'warning',
-        message: `Serie no encontrada en SAP (${searchedKeys || 'sin series válidas'})`,
+        message: `Serie no encontrada en SAP (${searched || 'sin series válidas'})`,
         isSapValidated: false,
         validationType: 'none'
     }
