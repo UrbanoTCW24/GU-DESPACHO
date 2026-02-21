@@ -137,11 +137,11 @@ async function checkSapValidation(supabase: SupabaseClient, seriesData: SeriesDa
         }
     }
 
-    // Case 3: No Match Found in any key
+    // Case 3: No Match Found — save as non-validated (don't block)
     const searchedKeys = priorityOrder.filter(k => seriesData[k]).map(k => `${k}: ${seriesData[k]}`).join(' / ')
     return {
-        status: 'error',
-        message: `Error: La serie escaneada no existe en SAP. (Se buscó: ${searchedKeys || 'Ninguna serie válida recibida'})`,
+        status: 'warning',
+        message: `Serie no encontrada en SAP (${searchedKeys || 'sin series válidas'})`,
         isSapValidated: false,
         validationType: 'none'
     }
@@ -184,12 +184,12 @@ export async function addEquipment(boxId: string, seriesData: SeriesData) {
     const globalError = await validateGlobalDuplicates(supabase, seriesData)
     if (globalError) return { error: globalError }
 
-    // 3. SAP Validation (Strict Sequential)
+    // 3. SAP Validation — blocking: if not found in SAP, reject the scan
     const sapResult = await checkSapValidation(supabase, seriesData)
 
-    if (sapResult.status === 'error') {
-        // BLOCK THE ACTION
-        return { error: sapResult.message }
+    if (sapResult.status === 'warning') {
+        // Not found in SAP — block but show yellow warning (not red error)
+        return { sapWarning: sapResult.message }
     }
 
     // 4. Insert Item
@@ -219,7 +219,6 @@ export async function addEquipment(boxId: string, seriesData: SeriesData) {
     // Return success with extra info for UI
     return {
         success: true,
-        warning: sapResult.status === 'warning' ? sapResult.message : undefined,
         isSapValidated: sapResult.isSapValidated,
         matchedPosition: sapResult.matchedPosition
     }

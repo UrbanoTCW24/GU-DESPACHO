@@ -17,6 +17,7 @@ export async function getBoxReport(limit = 100) {
             users (email, name),
             equipment (id)
         `)
+        .neq('status', 'dispatched')
         .order('created_at', { ascending: false })
         .limit(limit)
 

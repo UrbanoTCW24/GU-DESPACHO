@@ -82,7 +82,7 @@ export default async function ReportPage({
                     <CardContent>
                         <div className="text-2xl font-bold text-slate-800">{totalEquipment}</div>
                         <p className="text-xs text-muted-foreground">
-                            Total histórico de equipos validados
+                            Equipos activos sin despachar
                         </p>
                     </CardContent>
                 </Card>
@@ -135,7 +135,8 @@ export default async function ReportPage({
                                                     day: '2-digit',
                                                     month: '2-digit',
                                                     hour: '2-digit',
-                                                    minute: '2-digit'
+                                                    minute: '2-digit',
+                                                    hour12: false
                                                 })}
                                             </TableCell>
                                             <TableCell className="font-bold">{item.boxes?.box_number}</TableCell>

@@ -6,7 +6,8 @@ export async function getTotalEquipment() {
     const supabase = await createClient()
     const { count, error } = await supabase
         .from('equipment')
-        .select('*', { count: 'exact', head: true })
+        .select('*, boxes!inner(status)', { count: 'exact', head: true })
+        .neq('boxes.status', 'dispatched')
 
     if (error) return 0
     return count || 0
@@ -34,6 +35,7 @@ export async function getGeneralReport(
             ),
             users:users!equipment_scanned_by_fkey(email, name)
         `, { count: 'exact' })
+        .neq('boxes.status', 'dispatched') // Only show equipment in active (non-dispatched) boxes
         .order('scanned_at', { ascending: false })
 
     // Apply Filters

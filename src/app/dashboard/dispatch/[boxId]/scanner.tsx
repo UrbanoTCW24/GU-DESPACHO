@@ -102,19 +102,16 @@ export default function Scanner({ boxId, modelConfig, items, totalTarget, status
         setLoading(false)
 
         if (result.error) {
+            // ❌ Duplicado o campo inválido — error rojo bloqueante
             toast.error(result.error)
-            // Focus first input (or the one that caused error if we knew)
+            inputRefs.current[0]?.select()
+        } else if (result.sapWarning) {
+            // ⚠️ No encontrado en SAP — warning amarillo bloqueante (no se guardó)
+            toast.warning(result.sapWarning, { duration: 3000 })
             inputRefs.current[0]?.select()
         } else {
-            if (result.warning) {
-                // Secondary Validation Warning
-                toast.warning(result.warning, { duration: 5000 })
-            } else {
-                toast.success("Equipo agregado (Validación SAP OK)")
-            }
-
-            setInputs({}) // Clear inputs
-            // Small delay to ensure focus works after state update
+            // ✅ SAP OK — silencioso, limpiar inputs para siguiente escaneo
+            setInputs({})
             setTimeout(() => inputRefs.current[0]?.focus(), 10)
         }
     }
@@ -212,11 +209,8 @@ export default function Scanner({ boxId, modelConfig, items, totalTarget, status
                                 </div>
                                 <div className="grid gap-3 w-full max-w-xs">
                                     <Button size="lg" onClick={handleContinueDispatch} disabled={loading} className="w-full bg-green-600 hover:bg-green-700 h-14 text-lg shadow-lg">
-                                        {loading ? 'Procesando...' : (
-                                            <>
-                                                Cerrar y Continuar <ArrowRight className="ml-2 h-5 w-5" />
-                                            </>
-                                        )}
+                                        <span>{loading ? 'Procesando...' : 'Cerrar y Continuar'}</span>
+                                        <ArrowRight className={`ml-2 h-5 w-5 ${loading ? 'hidden' : ''}`} />
                                     </Button>
                                     <Button variant="outline" size="lg" onClick={handleCloseAndPrint} disabled={loading} className="w-full border-green-600 text-green-700 hover:bg-green-50">
                                         <Printer className="mr-2 h-5 w-5" />

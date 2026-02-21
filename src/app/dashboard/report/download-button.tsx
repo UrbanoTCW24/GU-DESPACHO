@@ -15,7 +15,9 @@ export function DownloadReportButton() {
         setLoadingGeneral(true)
         try {
             // Fetch all data
-            const data = await getGeneralReport(0)
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const result: any = await getGeneralReport(0)
+            const data = Array.isArray(result) ? result : result.data
 
             if (!data || data.length === 0) {
                 alert('No hay datos para exportar')
@@ -23,38 +25,31 @@ export function DownloadReportButton() {
                 return
             }
 
-            // Calculate max number of series to generate dynamic columns
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const maxSeriesCount = data.reduce((max: number, item: any) => {
-                const count = Object.keys(item.series_data || {}).length
-                return count > max ? count : max
-            }, 0)
-
             // Map data to flat structure for Excel
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const excelRows = data.map((item: any) => {
                 const seriesValues = Object.values(item.series_data || {}) as string[]
+                const primarySeries = seriesValues[0] || '-'
+                const additionalSeries = seriesValues.slice(1).join(', ')
 
-                // Base row data
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                const row: any = {
-                    'Fecha de Registro': new Date(item.scanned_at).toLocaleString('es-MX'),
+                return {
+                    'Fecha de Registro': new Date(item.scanned_at).toLocaleString('es-MX', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: true
+                    }),
                     'Caja': item.boxes?.box_number || '',
                     'Marca': item.boxes?.models?.brands?.name || '',
                     'Modelo': item.boxes?.models?.name || '',
-                    'Material': item.material || '', // Correctly mapping actual material field
+                    'Material': item.material || '',
+                    'Serie SAP / Principal': primarySeries,
+                    'Series Adicionales': additionalSeries,
+                    'Usuario': item.users?.name || item.users?.email || '',
+                    'Estado Validación': item.is_sap_validated ? 'VALIDADO OK' : 'MANUAL'
                 }
-
-                // Dynamic Series Columns
-                for (let i = 0; i < maxSeriesCount; i++) {
-                    row[`Serie ${i + 1}`] = seriesValues[i] || ''
-                }
-
-                // Append remaining static columns
-                row['Usuario'] = item.users?.name || item.users?.email || ''
-                row['Estado Validación'] = item.is_sap_validated ? 'VALIDADO OK' : 'MANUAL'
-
-                return row
             })
 
             generateExcel(excelRows, 'Reporte_General', [
@@ -63,6 +58,10 @@ export function DownloadReportButton() {
                 { wch: 15 }, // Marca
                 { wch: 20 }, // Modelo
                 { wch: 20 }, // Material
+                { wch: 25 }, // Serie SAP / Principal
+                { wch: 30 }, // Series Adicionales
+                { wch: 25 }, // Usuario
+                { wch: 15 }, // Estado
             ])
 
         } catch (error) {

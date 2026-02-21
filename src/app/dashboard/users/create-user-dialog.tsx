@@ -138,8 +138,10 @@ export function CreateUserDialog() {
                     </div>
                     <DialogFooter>
                         <Button type="submit" disabled={loading}>
-                            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Crear Usuario
+                            <span className="flex items-center">
+                                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                Crear Usuario
+                            </span>
                         </Button>
                     </DialogFooter>
                 </form>

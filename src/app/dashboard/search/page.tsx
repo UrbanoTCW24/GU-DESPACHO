@@ -42,10 +42,9 @@ export default function SearchPage() {
                             onChange={(e) => setQuery(e.target.value)}
                             className="max-w-md"
                         />
-                        <Button type="submit" disabled={loading}>
-                            <span>
-                                {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2 h-4 w-4" />}
-                            </span>
+                        <Button type="submit" disabled={loading} className="gap-2">
+                            <Loader2 className={`h-4 w-4 animate-spin ${loading ? '' : 'hidden'}`} />
+                            <Search className={`h-4 w-4 ${loading ? 'hidden' : ''}`} />
                             Buscar
                         </Button>
                     </form>

@@ -147,7 +147,7 @@ export function GlobalReportDialog() {
                     {loadingOptions ? (
                         <div className="text-center py-4 text-sm text-muted-foreground">Cargando opciones...</div>
                     ) : (
-                        <>
+                        <div className="space-y-4">
                             <div className="grid grid-cols-4 items-center gap-4">
                                 <Label htmlFor="brand" className="text-right">
                                     Marca
@@ -199,7 +199,7 @@ export function GlobalReportDialog() {
                                     </SelectContent>
                                 </Select>
                             </div>
-                        </>
+                        </div>
                     )}
                 </div>
                 <DialogFooter>

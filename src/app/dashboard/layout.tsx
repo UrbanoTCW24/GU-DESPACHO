@@ -10,7 +10,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { CircleUser, Menu, Package2, Search } from 'lucide-react'
+import { CircleUser, Menu, Package2, Search, Truck } from 'lucide-react'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 
 
@@ -59,7 +59,15 @@ export default async function DashboardLayout({
                                 href="/dashboard/dispatch"
                                 className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
                             >
-                                Despacho Masivo
+                                <Package2 className="h-4 w-4" />
+                                Armado de Cajas
+                            </Link>
+                            <Link
+                                href="/dashboard/shipments"
+                                className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+                            >
+                                <Truck className="h-4 w-4" />
+                                Salida de Mercancía
                             </Link>
                             <Link
                                 href="/dashboard/search"
@@ -135,13 +143,34 @@ export default async function DashboardLayout({
                                     href="/dashboard/dispatch"
                                     className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
                                 >
-                                    Despacho
+                                    <Package2 className="h-4 w-4" />
+                                    Armado de Cajas
+                                </Link>
+                                <Link
+                                    href="/dashboard/shipments"
+                                    className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+                                >
+                                    <Truck className="h-4 w-4" />
+                                    Salida de Mercancía
                                 </Link>
                                 <Link
                                     href="/dashboard/search"
                                     className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
                                 >
+                                    <Search className="h-4 w-4" />
                                     Trazabilidad
+                                </Link>
+                                <Link
+                                    href="/dashboard/report"
+                                    className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+                                >
+                                    Reporte General
+                                </Link>
+                                <Link
+                                    href="/dashboard/report-box"
+                                    className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
+                                >
+                                    Reporte de Cajas
                                 </Link>
                             </nav>
                         </SheetContent>

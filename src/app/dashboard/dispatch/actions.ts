@@ -37,6 +37,7 @@ export async function getTotalBoxes() {
     const { count, error } = await supabase
         .from('boxes')
         .select('*', { count: 'exact', head: true })
+        .neq('status', 'dispatched')
 
     if (error) return 0
     return count || 0
@@ -164,4 +165,58 @@ export async function updateBox(boxId: string, modelId: string, totalItems: numb
     if (error) return { error: error.message }
     revalidatePath('/dashboard/dispatch')
     return { success: true }
+}
+
+export async function createDispatch(
+    boxIds: string[],
+    sapExitId: string,
+    type: 'BOX' | 'PALLET',
+    notes?: string
+) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return { error: 'Unauthorized' }
+
+    if (!boxIds || boxIds.length === 0) {
+        return { error: 'No se han seleccionado cajas para despachar.' }
+    }
+
+    if (!sapExitId) {
+        return { error: 'El ID de Salida SAP es obligatorio.' }
+    }
+
+    // 1. Create Dispatch Record
+    const { data: dispatch, error: dispatchError } = await supabase
+        .from('dispatches')
+        .insert({
+            created_by: user.id,
+            sap_exit_id: sapExitId,
+            type: type,
+            notes: notes,
+            // pallet_id can be added if we implement "Pre-Palletizing", 
+            // but for now we dispatch a SET of boxes as a PALLET type dispatch.
+        })
+        .select()
+        .single()
+
+    if (dispatchError) {
+        console.error('Error creating dispatch:', dispatchError)
+        return { error: 'Error al crear el registro de despacho: ' + dispatchError.message }
+    }
+
+    // 2. Update Boxes with dispatch_id AND mark as dispatched
+    const { error: boxError } = await supabase
+        .from('boxes')
+        .update({ dispatch_id: dispatch.id, status: 'dispatched' })
+        .in('id', boxIds)
+
+    if (boxError) {
+        console.error('Error updating boxes:', boxError)
+        return { error: 'Error al vincular cajas al despacho: ' + boxError.message }
+    }
+
+    revalidatePath('/dashboard/dispatch')
+    revalidatePath('/dashboard/report')
+    return { success: true, dispatchId: dispatch.id }
 }
