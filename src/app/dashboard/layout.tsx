@@ -53,57 +53,57 @@ export default async function DashboardLayout({
                                 href="/dashboard"
                                 className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
                             >
-                                Dashboard
+                                <span>Dashboard</span>
                             </Link>
                             <Link
                                 href="/dashboard/dispatch"
                                 className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
                             >
                                 <Package2 className="h-4 w-4" />
-                                Armado de Cajas
+                                <span>Armado de Cajas</span>
                             </Link>
                             <Link
                                 href="/dashboard/shipments"
                                 className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
                             >
                                 <Truck className="h-4 w-4" />
-                                Salida de Mercancía
+                                <span>Salida de Mercancía</span>
                             </Link>
                             <Link
                                 href="/dashboard/search"
                                 className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
                             >
                                 <Search className="h-4 w-4" />
-                                Trazabilidad
+                                <span>Trazabilidad</span>
                             </Link>
                             <Link
                                 href="/dashboard/report"
                                 className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
                             >
                                 <Package2 className="h-4 w-4" />
-                                Reporte General
+                                <span>Informe general</span>
                             </Link>
                             <Link
                                 href="/dashboard/report-box"
                                 className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
                             >
                                 <Package2 className="h-4 w-4" />
-                                Reporte de Cajas
+                                <span>Reporte de Cajas</span>
                             </Link>
                             {isAdmin && (
                                 <>
-                                    <div className="mt-4 mb-2 px-4 text-xs font-semibold text-muted-foreground">Admin</div>
+                                    <div className="mt-4 mb-2 px-4 text-xs font-semibold text-muted-foreground"><span>Administración</span></div>
                                     <Link
                                         href="/dashboard/config"
                                         className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
                                     >
-                                        Configuración
+                                        <span>Configuración</span>
                                     </Link>
                                     <Link
                                         href="/dashboard/users"
                                         className="flex items-center gap-3 rounded-lg bg-muted px-3 py-2 text-primary transition-all hover:text-primary"
                                     >
-                                        Usuarios
+                                        <span>Usuarios</span>
                                     </Link>
                                 </>
                             )}
@@ -137,40 +137,40 @@ export default async function DashboardLayout({
                                     href="/dashboard"
                                     className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
                                 >
-                                    Dashboard
+                                    <span>Dashboard</span>
                                 </Link>
                                 <Link
                                     href="/dashboard/dispatch"
                                     className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
                                 >
                                     <Package2 className="h-4 w-4" />
-                                    Armado de Cajas
+                                    <span>Armado de Cajas</span>
                                 </Link>
                                 <Link
                                     href="/dashboard/shipments"
                                     className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
                                 >
                                     <Truck className="h-4 w-4" />
-                                    Salida de Mercancía
+                                    <span>Salida de Mercancía</span>
                                 </Link>
                                 <Link
                                     href="/dashboard/search"
                                     className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
                                 >
                                     <Search className="h-4 w-4" />
-                                    Trazabilidad
+                                    <span>Trazabilidad</span>
                                 </Link>
                                 <Link
                                     href="/dashboard/report"
                                     className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
                                 >
-                                    Reporte General
+                                    <span>Informe general</span>
                                 </Link>
                                 <Link
                                     href="/dashboard/report-box"
                                     className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
                                 >
-                                    Reporte de Cajas
+                                    <span>Reporte de Cajas</span>
                                 </Link>
                             </nav>
                         </SheetContent>

@@ -152,7 +152,7 @@ export function ActiveBoxesList({ boxes, models, isAdmin, mode }: ActiveBoxesLis
                                     <CardTitle className="text-lg">{box.box_number}</CardTitle>
                                 </div>
                                 <p className="text-sm text-muted-foreground">
-                                    {box.models?.brands?.name} {box.models?.name}
+                                    <span suppressHydrationWarning>{box.models?.brands?.name} {box.models?.name}</span>
                                 </p>
                                 {isAdmin && (
                                     <div className="absolute top-2 right-2 flex gap-1">
@@ -163,8 +163,8 @@ export function ActiveBoxesList({ boxes, models, isAdmin, mode }: ActiveBoxesLis
                             </CardHeader>
                             <CardContent className={`${mode === 'shipping' ? 'pl-10' : ''}`}>
                                 <div className="text-sm space-y-2">
-                                    <p>Creado por: {box.users?.name || box.users?.email}</p>
-                                    <p>Items: {box.equipment?.[0]?.count || 0} / {box.total_items}</p>
+                                    <p suppressHydrationWarning><span suppressHydrationWarning>Creado por: {box.users?.name || box.users?.email}</span></p>
+                                    <p suppressHydrationWarning>Items: {box.equipment?.[0]?.count || 0} / {box.total_items}</p>
 
                                     {/* Action Buttons based on mode */}
                                     {mode === 'packing' ? (

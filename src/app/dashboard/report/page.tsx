@@ -19,13 +19,14 @@ import { ReportFilters } from './report-filters'
 export default async function ReportPage({
     searchParams,
 }: {
-    searchParams: { [key: string]: string | string[] | undefined }
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
-    const page = Number(searchParams.page) || 1
+    const params = await searchParams
+    const page = Number(params.page) || 1
     const pageSize = 20 // Default page size for viewing
-    const brand = searchParams.brand as string
-    const model = searchParams.model as string
-    const material = searchParams.material as string
+    const brand = params.brand as string
+    const model = params.model as string
+    const material = params.material as string
 
     const filters = { brand, model, material }
 

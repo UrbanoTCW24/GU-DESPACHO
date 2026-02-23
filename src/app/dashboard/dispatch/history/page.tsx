@@ -22,10 +22,11 @@ import { getDispatches } from './actions'
 export default async function DispatchHistoryPage({
     searchParams,
 }: {
-    searchParams: { [key: string]: string | string[] | undefined }
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
-    const page = Number(searchParams.page) || 1
-    const search = searchParams.search as string || ''
+    const params = await searchParams
+    const page = Number(params.page) || 1
+    const search = params.search as string || ''
     const pageSize = 20
 
     const { data: dispatches, count } = await getDispatches(page, pageSize, search)

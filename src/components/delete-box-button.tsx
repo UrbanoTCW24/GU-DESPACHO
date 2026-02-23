@@ -35,7 +35,7 @@ export function DeleteBoxButton({ boxId, boxNumber, variant = "destructive", siz
     }
 
     return (
-        <Button variant={variant} size={size} onClick={handleDelete} disabled={loading} title="Eliminar caja">
+        <Button variant={variant} size={size} onClick={handleDelete} disabled={loading} title="Eliminar caja" suppressHydrationWarning>
             <Loader2 className={`h-4 w-4 animate-spin ${loading ? '' : 'hidden'}`} />
             <Trash2 className={`h-4 w-4 ${loading ? 'hidden' : ''}`} />
             <span className={`ml-2 ${iconOnly ? 'hidden' : ''}`}>Eliminar</span>

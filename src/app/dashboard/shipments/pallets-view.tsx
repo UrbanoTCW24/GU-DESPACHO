@@ -74,7 +74,16 @@ export function PalletsView({ pallets: initialPallets, availableBoxes }: Pallets
         const code = scanInput.trim()
         if (!code || !activePalletId) return
 
-        const box = availableBoxes.find(b => b.box_number.toLowerCase() === code.toLowerCase())
+        // Normalize: strip "CAJA-" prefix and leading zeros so
+        // "000211", "211", "CAJA-000211" all resolve to the same box
+        const normalize = (s: string) =>
+            s.toUpperCase().replace(/^CAJA-?/i, '').replace(/^0+/, '') || '0'
+
+        const box = availableBoxes.find(b =>
+            b.box_number.toLowerCase() === code.toLowerCase() ||
+            normalize(b.box_number) === normalize(code)
+        )
+
         if (!box) {
             toast.error(`Caja "${code}" no encontrada o ya fue asignada`)
             setScanInput('')
